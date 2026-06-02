@@ -1,0 +1,37 @@
+import React, { useEffect, useState } from "react";
+let alertHandle;
+
+export const showCustomAlert = (message) => {
+  if (alertHandle) {
+    alertHandle(message);
+  }
+};
+
+const CustomeAlert = () => {
+  const [mess, setMess] = useState("");
+  const [Visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    alertHandle = (message) => {
+      setMess(message);
+      setVisible(true);
+    };
+  }, []);
+
+  return (
+    Visible && (
+      <div className="fixed inset-0 flex items-start justify-center pt-12.5 bg-black/50 z-50">
+        <div className="bg-[#202124] text-white rounded-lg shadow-lg p-6 w-80">
+          <p className="text-sm">{mess}</p>
+          <div className="flex justify-end mt-1">
+            <button className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-full text-sm" onClick={()=>setVisible(false)}>
+              Ok
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  );
+};
+
+export default CustomeAlert;
