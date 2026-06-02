@@ -20,8 +20,8 @@ const GetCurrentUser = () => {
         dispatch(setUserData(null));
       }
     };
-    fetchUser()
-  }, []);
+    fetchUser();
+  }, [dispatch]);
 };
 
 export default GetCurrentUser;
