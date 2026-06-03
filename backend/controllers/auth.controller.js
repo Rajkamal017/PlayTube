@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs"
 import uploadOnCloudinary from "../config/cloudinary.js"
-import User from "../models/user.model.js"
+import User from "../models/userModel.js"
 import validator from "validator"
 import genToken from "../config/token.js"
 import sendMail from "../config/sendMail.js"
@@ -154,9 +154,9 @@ export const sendOtp = async (req, res) => {
 export const verifyOtp = async (req, res) => {
     try {
         const { email, otp } = req.body
-        const user = await User.findOne({email})
-        if(!user || user.resetOtp != otp || user.otpExpires < Date.now()){
-            return res.status(400).json({message:"Invalid OTP"})
+        const user = await User.findOne({ email })
+        if (!user || user.resetOtp != otp || user.otpExpires < Date.now()) {
+            return res.status(400).json({ message: "Invalid OTP" })
         }
 
         user.resetOtp = undefined;
@@ -164,26 +164,26 @@ export const verifyOtp = async (req, res) => {
         user.isOtpVerified = true;
 
         await user.save()
-        return res.status(200).json({message: "OTP Verified successfully"})
+        return res.status(200).json({ message: "OTP Verified successfully" })
 
     } catch (error) {
-        return res.status(500).json({message: `OTP verification failed ${error}`})
+        return res.status(500).json({ message: `OTP verification failed ${error}` })
     }
 }
 
-export const resetPassword = async (req,res)=>{
+export const resetPassword = async (req, res) => {
     try {
-        const {email, password} = req.body
-        const user = await User.findOne({email})
-        if(!user || !user.isOtpVerified){
-            return res.status(400).json({message: "OTP verification required"})
+        const { email, password } = req.body
+        const user = await User.findOne({ email })
+        if (!user || !user.isOtpVerified) {
+            return res.status(400).json({ message: "OTP verification required" })
         }
-        const hashPassword = await bcrypt.hash(password,10);
+        const hashPassword = await bcrypt.hash(password, 10);
         user.password = hashPassword;
         user.isOtpVerified = false;
         await user.save()
-        return res.status(200).json({message:"Password reset successfully"})
+        return res.status(200).json({ message: "Password reset successfully" })
     } catch (error) {
-        return res.status(500).json({message:`Password reset error ${error}`})
+        return res.status(500).json({ message: `Password reset error ${error}` })
     }
 }

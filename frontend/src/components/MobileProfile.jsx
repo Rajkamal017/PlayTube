@@ -76,7 +76,14 @@ const MobileProfile = () => {
           <div className="flex flex-col">
             <span className="font-semibold text-lg">{userData?.userName}</span>
             <span className="text-gray-400 text-sm">{userData?.email}</span>
-            <p className="text-sm text-blue-400 cursor-pointer hover:underline">
+            <p
+              className="text-sm text-blue-400 cursor-pointer hover:underline"
+              onClick={() => {
+                userData?.channel
+                  ? navigate("/viewchannel")
+                  : navigate("/createchannel ");
+              }}
+            >
               {userData?.channel ? "view channel" : "create channel"}
             </p>
           </div>
@@ -85,19 +92,31 @@ const MobileProfile = () => {
 
       {/* Auth button */}
       <div className="flex gap-2 p-4 border-b border-gray-800 overflow-auto">
-        <button className="bg-gray-800 text-nowrap px-3 py-1 rounded-2xl text-sm flex items-center" onClick={handleGoogleAuth}>
+        <button
+          className="bg-gray-800 text-nowrap px-3 py-1 rounded-2xl text-sm flex items-center"
+          onClick={handleGoogleAuth}
+        >
           <FcGoogle className="text-xl" />
           Sign in with google account
         </button>
-        <button className="bg-gray-800 text-nowrap px-3 py-1 rounded-2xl text-sm flex items-center" onClick={()=>navigate("/signup")}>
+        <button
+          className="bg-gray-800 text-nowrap px-3 py-1 rounded-2xl text-sm flex items-center"
+          onClick={() => navigate("/signup")}
+        >
           <TiUserAddOutline className="text-xl" />
           Create new account
         </button>
-        <button className="bg-gray-800 text-nowrap px-3 py-1 rounded-2xl text-sm flex items-center" onClick={()=>navigate("/signin")}>
+        <button
+          className="bg-gray-800 text-nowrap px-3 py-1 rounded-2xl text-sm flex items-center"
+          onClick={() => navigate("/signin")}
+        >
           <MdOutlineSwitchAccount className="text-xl" />
           Sign in with other account
         </button>
-        <button className="bg-gray-800 text-nowrap px-3 py-1 rounded-2xl text-sm flex items-center" onClick={handleSignout}>
+        <button
+          className="bg-gray-800 text-nowrap px-3 py-1 rounded-2xl text-sm flex items-center"
+          onClick={handleSignout}
+        >
           <FiLogOut className="text-xl" />
           Sign out
         </button>

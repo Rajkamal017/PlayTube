@@ -41,19 +41,22 @@ const Profile = () => {
       let email = user.email;
       let photoUrl = user.photoURL;
 
-      const formData = new FormData()
-      formData.append("userName", userName)
-      formData.append("email", email)
-      formData.append("photoUrl",photoUrl)
+      const formData = new FormData();
+      formData.append("userName", userName);
+      formData.append("email", email);
+      formData.append("photoUrl", photoUrl);
 
-      const result = await axios.post(serverUrl + "/api/auth/googleauth", formData, {withCredentials:true})
+      const result = await axios.post(
+        serverUrl + "/api/auth/googleauth",
+        formData,
+        { withCredentials: true },
+      );
       dispatch(setUserData(result.data));
       console.log(result.data);
       showCustomAlert("Google Authentication Successfully");
-
     } catch (error) {
       console.log(error);
-      showCustomAlert("Google Auth error")
+      showCustomAlert("Google Auth error");
     }
   };
 
@@ -70,7 +73,14 @@ const Profile = () => {
             <div>
               <h3 className="font-semibold">{userData?.userName}</h3>
               <p className="text-sm text-gray-400">{userData?.email}</p>
-              <p className="text-sm text-blue-400 cursor-pointer hover:underline">
+              <p
+                className="text-sm text-blue-400 cursor-pointer hover:underline"
+                onClick={() => {
+                  userData?.channel
+                    ? navigate("/viewchannel")
+                    : navigate("/createchannel ");
+                }}
+              >
                 {userData?.channel ? "view channel" : "create channel"}
               </p>
             </div>
