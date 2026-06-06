@@ -19,15 +19,14 @@ import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Profile from "../components/Profile";
 
-
 function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedItem, setSelectedItem] = useState("Home");
   const [active, setActive] = useState("Home");
   const navigate = useNavigate();
-  const location = useLocation()
-  const {userData} = useSelector((state)=>state.user)
-  const [popup, setPopup] = useState(false)
+  const location = useLocation();
+  const { userData } = useSelector((state) => state.user);
+  const [popup, setPopup] = useState(false);
 
   const categories = [
     "Music",
@@ -89,11 +88,24 @@ function Home() {
 
           {/* Right */}
           <div className="flex items-center gap-3">
-            {userData?.channel && <button className="hidden md:flex items-center gap-1 bg-[#1f1f1f] px-3 py-1 rounded-full cursor-pointer">
-              <span className="text-lg ">+</span>
-              <span>Create</span>
-            </button>}
-            { !userData?.photoUrl ?<FaUserCircle className="text-3xl hidden md:flex text-gray-400" onClick={()=>setPopup(prev => !prev)}/> : <img src={userData?.photoUrl} className="w-9 h-9 rounded-full object-fit-cover border border-gray-700 hidden md:flex" onClick={()=>setPopup(prev => !prev)}/> }
+            {userData?.channel && (
+              <button className="hidden md:flex items-center gap-1 bg-[#1f1f1f] px-3 py-1 rounded-full cursor-pointer" onClick={()=>navigate("/create")}>
+                <span className="text-lg ">+</span>
+                <span>Create</span>
+              </button>
+            )}
+            {!userData?.photoUrl ? (
+              <FaUserCircle
+                className="text-3xl hidden md:flex text-gray-400"
+                onClick={() => setPopup((prev) => !prev)}
+              />
+            ) : (
+              <img
+                src={userData?.photoUrl}
+                className="w-9 h-9 rounded-full object-fit-cover border border-gray-700 hidden md:flex"
+                onClick={() => setPopup((prev) => !prev)}
+              />
+            )}
             <FaSearch className="text-lg md:hidden flex" />
           </div>
         </div>
@@ -190,7 +202,7 @@ function Home() {
             </div>
           </>
         )}
-        {popup && <Profile/>}
+        {popup && <Profile />}
         <div className="mt-2"></div>
         <Outlet />
       </main>
@@ -202,7 +214,10 @@ function Home() {
           text={"Home"}
           active={active === "Home"}
           on
-          onClick={() => {setActive("Home"); navigate("/")}}
+          onClick={() => {
+            setActive("Home");
+            navigate("/");
+          }}
         />
         <MobileSizeNav
           icon={<SiYoutubeshorts />}
@@ -215,7 +230,7 @@ function Home() {
           icon={<IoIosAddCircle size={40} />}
           active={active === "+"}
           on
-          onClick={() => setActive("+")}
+          onClick={() => {setActive("+"); navigate("/create")}}
         />
         <MobileSizeNav
           icon={<MdOutlineSubscriptions />}
@@ -225,11 +240,23 @@ function Home() {
           onClick={() => setActive("Subscriptions")}
         />
         <MobileSizeNav
-          icon={!userData?.photoUrl ? <FaUserCircle/>: <img src={userData.photoUrl} className="w-8 h-8 rounded-full object-fit-cover border border-gray-700"/>}
+          icon={
+            !userData?.photoUrl ? (
+              <FaUserCircle />
+            ) : (
+              <img
+                src={userData.photoUrl}
+                className="w-8 h-8 rounded-full object-fit-cover border border-gray-700"
+              />
+            )
+          }
           text={"You"}
           active={active === "You"}
           on
-          onClick={() => {setActive("You"); navigate("/mobilepro")}}
+          onClick={() => {
+            setActive("You");
+            navigate("/mobilepro");
+          }}
         />
       </nav>
     </div>
