@@ -1,5 +1,5 @@
 import express from 'express'
-import { createVideo, getAllVideos, getVideoById } from '../controllers/video.controller.js'
+import { createVideo, getAllVideos, getVideoById, addComment, getComments, deleteComment, toggleLikeVideo, searchVideos, incrementViewCount } from '../controllers/video.controller.js'
 import { createShort, getAllShorts } from '../controllers/short.controller.js'
 import isAuth from '../middlewares/isAuth.js'
 import upload from '../middlewares/multer.js'
@@ -16,6 +16,16 @@ contentRouter.post("/create-video", isAuth, upload.fields([
 // Videos Retrieve
 contentRouter.get("/get-all-videos", getAllVideos)
 contentRouter.get("/video/:videoId", getVideoById)
+contentRouter.get("/search", searchVideos)
+contentRouter.post("/video/:videoId/view", incrementViewCount)
+
+// Comments Routes
+contentRouter.post("/video/:videoId/comment", isAuth, addComment)
+contentRouter.get("/video/:videoId/comments", getComments)
+contentRouter.delete("/video/:videoId/comment/:commentId", isAuth, deleteComment)
+
+// Like/Dislike Routes
+contentRouter.post("/video/:videoId/like", isAuth, toggleLikeVideo)
 
 
 // Shorts Create/Retrieve

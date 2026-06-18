@@ -21,6 +21,8 @@ import CreatePost from "./pages/Post/CreatePost";
 import CreateShorts from "./pages/Shorts/CreateShorts";
 import GetAllContentData from "./customHooks/GetAllContentData";
 import WatchVideo from "./pages/Videos/WatchVideo";
+import SearchResults from "./pages/Videos/SearchResults";
+import ChannelPage from "./pages/Channel/ChannelPage";
 
 const ProtectRoute = ({ userData, children }) => {
   if (!userData) {
@@ -42,6 +44,8 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />}>
           <Route path="/watch/:videoId" element={<WatchVideo />} />
+          <Route path="/search" element={<SearchResults />} />
+          <Route path="/channel/:channelId" element={<ChannelPage />} />
           <Route
             path="/shorts"
             element={

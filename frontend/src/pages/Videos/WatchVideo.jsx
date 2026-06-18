@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
-import { FaThumbsUp, FaThumbsDown, FaShare, FaBookmark, FaRegThumbsUp, FaRegThumbsDown } from 'react-icons/fa';
+import { FaThumbsUp, FaThumbsDown, FaShare, FaBookmark, FaRegThumbsUp, FaRegThumbsDown, FaTrash, FaUserCircle } from 'react-icons/fa';
 import { ClipLoader } from 'react-spinners';
 import { serverUrl } from '../../config';
 import { showCustomAlert } from '../../components/CustomeAlert';
@@ -14,13 +14,23 @@ const WatchVideo = () => {
   const dispatch = useDispatch();
 
   const { allVideosData } = useSelector((state) => state.content);
+  const { userData } = useSelector((state) => state.user);
 
   // States
   const [video, setVideo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscribersCount, setSubscribersCount] = useState(0);
   const [likeState, setLikeState] = useState(null); // 'like', 'dislike', or null
+  const [likesCount, setLikesCount] = useState(0);
   const [isDescExpanded, setIsDescExpanded] = useState(false);
+
+  // Comments states
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [commentLoading, setCommentLoading] = useState(false);
+  const [commentsFetching, setCommentsFetching] = useState(true);
+  const [inputFocused, setInputFocused] = useState(false);
 
   // Fetch active video details
   useEffect(() => {
@@ -30,7 +40,26 @@ const WatchVideo = () => {
         const response = await axios.get(`${serverUrl}/api/content/video/${videoId}`, {
           withCredentials: true,
         });
-        setVideo(response.data.video);
+        const videoData = response.data.video;
+        setVideo(videoData);
+        setLikesCount(videoData.likes?.length || 0);
+
+        if (userData && videoData.likes) {
+          const userLiked = videoData.likes.includes(userData._id);
+          setLikeState(userLiked ? 'like' : null);
+        } else {
+          setLikeState(null);
+        }
+
+        if (videoData.channel) {
+          setSubscribersCount(videoData.channel.subscribers?.length || 0);
+          if (userData && videoData.channel.subscribers) {
+            const userSubscribed = videoData.channel.subscribers.includes(userData._id);
+            setIsSubscribed(userSubscribed);
+          } else {
+            setIsSubscribed(false);
+          }
+        }
       } catch (error) {
         console.error(error);
         showCustomAlert('Failed to load video details.');
@@ -40,6 +69,36 @@ const WatchVideo = () => {
     };
 
     fetchVideoDetails();
+  }, [videoId, userData]);
+
+  // Automatically increment view count when video is opened
+  useEffect(() => {
+    const incrementView = async () => {
+      try {
+        await axios.post(`${serverUrl}/api/content/video/${videoId}/view`, {}, { withCredentials: true });
+      } catch (error) {
+        console.error('Failed to increment view count:', error);
+      }
+    };
+    incrementView();
+  }, [videoId]);
+
+  // Fetch comments
+  useEffect(() => {
+    const fetchComments = async () => {
+      setCommentsFetching(true);
+      try {
+        const response = await axios.get(`${serverUrl}/api/content/video/${videoId}/comments`, {
+          withCredentials: true,
+        });
+        setComments(response.data.comments || []);
+      } catch (error) {
+        console.error('Error fetching comments:', error);
+      } finally {
+        setCommentsFetching(false);
+      }
+    };
+    fetchComments();
   }, [videoId]);
 
   // Fetch all videos list if Redux state is empty (for the sidebar)
@@ -59,24 +118,93 @@ const WatchVideo = () => {
     }
   }, [allVideosData, dispatch]);
 
-  const handleSubscribeToggle = () => {
-    setIsSubscribed(!isSubscribed);
-    showCustomAlert(!isSubscribed ? `Subscribed to ${video?.channel?.name}` : `Unsubscribed from ${video?.channel?.name}`);
-  };
+  // Handle Subscribe / Unsubscribe Toggle
+  const handleSubscribeToggle = async () => {
+    if (!userData) {
+      showCustomAlert('Please sign in to subscribe to channels.');
+      return;
+    }
+    if (video?.channel?.owner === userData._id) {
+      showCustomAlert('You cannot subscribe to your own channel.');
+      return;
+    }
 
-  const handleLike = () => {
-    if (likeState === 'like') {
-      setLikeState(null);
-    } else {
-      setLikeState('like');
+    try {
+      const response = await axios.post(
+        `${serverUrl}/api/user/channel/${video.channel?._id}/subscribe`,
+        {},
+        { withCredentials: true }
+      );
+      setIsSubscribed(response.data.isSubscribed);
+      setSubscribersCount(response.data.subscribersCount);
+    } catch (error) {
+      console.error(error);
+      const errorMsg = error.response?.data?.message || 'Error occurred while updating subscription.';
+      showCustomAlert(errorMsg);
     }
   };
 
-  const handleDislike = () => {
-    if (likeState === 'dislike') {
-      setLikeState(null);
-    } else {
-      setLikeState('dislike');
+  // Handle Video Like
+  const handleLike = async () => {
+    if (!userData) {
+      showCustomAlert('Please sign in to like videos.');
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${serverUrl}/api/content/video/${videoId}/like`,
+        {},
+        { withCredentials: true }
+      );
+      setLikeState(response.data.isLiked ? 'like' : null);
+      setLikesCount(response.data.likesCount);
+    } catch (error) {
+      console.error(error);
+      showCustomAlert('Failed to update like status.');
+    }
+  };
+
+  // Handle Comment Submission
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
+    if (!userData) {
+      showCustomAlert('Please sign in to post comments.');
+      return;
+    }
+
+    setCommentLoading(true);
+    try {
+      const response = await axios.post(
+        `${serverUrl}/api/content/video/${videoId}/comment`,
+        { message: newComment.trim() },
+        { withCredentials: true }
+      );
+      setComments(response.data.comments || []);
+      setNewComment('');
+      setInputFocused(false);
+    } catch (error) {
+      console.error(error);
+      showCustomAlert('Failed to post comment.');
+    } finally {
+      setCommentLoading(false);
+    }
+  };
+
+  // Handle Comment Deletion
+  const handleDeleteComment = async (commentId) => {
+    try {
+      const response = await axios.delete(
+        `${serverUrl}/api/content/video/${videoId}/comment/${commentId}`,
+        { withCredentials: true }
+      );
+      setComments(response.data.comments || []);
+      showCustomAlert('Comment deleted successfully.');
+    } catch (error) {
+      console.error(error);
+      showCustomAlert('Failed to delete comment.');
     }
   };
 
@@ -135,29 +263,37 @@ const WatchVideo = () => {
             
             {/* Channel info left */}
             <div className="flex items-center gap-3">
-              <img
-                src={video.channel?.avatar || 'https://via.placeholder.com/150'}
-                alt={video.channel?.name}
-                className="w-11 h-11 rounded-full object-cover border border-[#2d2d2d]"
-              />
+              <Link to={`/channel/${video.channel?._id}`} className="cursor-pointer shrink-0">
+                <img
+                  src={video.channel?.avatar || 'https://via.placeholder.com/150'}
+                  alt={video.channel?.name}
+                  className="w-11 h-11 rounded-full object-cover border border-[#2d2d2d] hover:opacity-85 transition"
+                />
+              </Link>
               <div className="flex flex-col">
-                <span className="font-bold text-white hover:text-purple-400 transition cursor-pointer text-base leading-snug">
+                <Link
+                  to={`/channel/${video.channel?._id}`}
+                  className="font-bold text-white hover:text-purple-400 transition cursor-pointer text-base leading-snug"
+                >
                   {video.channel?.name}
-                </span>
+                </Link>
                 <span className="text-xs text-gray-400">
-                  {video.channel?.subscribers?.length || 0} subscribers
+                  {subscribersCount} subscribers
                 </span>
               </div>
-              <button
-                onClick={handleSubscribeToggle}
-                className={`ml-3 px-5 py-2.5 rounded-full text-sm font-semibold transition duration-200 cursor-pointer ${
-                  isSubscribed
-                    ? 'bg-[#272727] text-gray-300 hover:bg-[#3d3d3d]'
-                    : 'bg-white text-black hover:bg-gray-200'
-                }`}
-              >
-                {isSubscribed ? 'Subscribed' : 'Subscribe'}
-              </button>
+              
+              {userData?._id !== video.channel?.owner && (
+                <button
+                  onClick={handleSubscribeToggle}
+                  className={`ml-3 px-5 py-2.5 rounded-full text-sm font-semibold transition duration-200 cursor-pointer ${
+                    isSubscribed
+                      ? 'bg-[#272727] text-gray-300 hover:bg-[#3d3d3d]'
+                      : 'bg-white text-black hover:bg-gray-200'
+                  }`}
+                >
+                  {isSubscribed ? 'Subscribed' : 'Subscribe'}
+                </button>
+              )}
             </div>
 
             {/* Actions right */}
@@ -170,13 +306,12 @@ const WatchVideo = () => {
                   className="flex items-center gap-2 hover:bg-[#3f3f3f] active:scale-95 transition py-1.5 px-4 rounded-l-full text-sm font-medium border-r border-[#3f3f3f]"
                 >
                   {likeState === 'like' ? <FaThumbsUp className="text-purple-500" /> : <FaRegThumbsUp />}
-                  <span>{video.likes?.length + (likeState === 'like' ? 1 : 0) || 0}</span>
+                  <span>{likesCount}</span>
                 </button>
                 <button
-                  onClick={handleDislike}
                   className="flex items-center gap-2 hover:bg-[#3f3f3f] active:scale-95 transition py-1.5 px-4 rounded-r-full text-sm font-medium"
                 >
-                  {likeState === 'dislike' ? <FaThumbsDown className="text-purple-500" /> : <FaRegThumbsDown />}
+                  <FaRegThumbsDown />
                 </button>
               </div>
 
@@ -233,6 +368,116 @@ const WatchVideo = () => {
             <div className="pt-1 text-xs text-purple-400 font-semibold">
               {isDescExpanded ? 'Show less' : 'Show more'}
             </div>
+          </div>
+
+          {/* Comments Section */}
+          <div className="space-y-6 pt-4">
+            
+            {/* Header */}
+            <div className="flex items-center gap-6">
+              <h2 className="text-lg font-bold text-white tracking-tight">
+                {comments.length} Comments
+              </h2>
+            </div>
+
+            {/* Input Form */}
+            <form onSubmit={handleAddComment} className="flex gap-3 items-start">
+              {userData?.photoUrl ? (
+                <img
+                  src={userData.photoUrl}
+                  alt={userData.userName}
+                  className="w-10 h-10 rounded-full object-cover border border-[#2d2d2d]"
+                />
+              ) : (
+                <div className="text-gray-500 bg-[#272727] p-2.5 rounded-full border border-gray-800">
+                  <FaUserCircle size={20} />
+                </div>
+              )}
+              
+              <div className="flex-1 space-y-3">
+                <input
+                  type="text"
+                  placeholder="Add a comment..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  onFocus={() => setInputFocused(true)}
+                  className="w-full bg-transparent border-b border-gray-700 py-2 text-sm text-white focus:outline-none focus:border-white transition"
+                />
+
+                {inputFocused && (
+                  <div className="flex justify-end gap-3 animate-fade-in">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNewComment('');
+                        setInputFocused(false);
+                      }}
+                      className="px-4 py-2 text-sm font-semibold text-gray-400 hover:text-white transition cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={commentLoading || !newComment.trim()}
+                      className="px-5 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 text-white text-sm font-semibold rounded-full shadow transition cursor-pointer"
+                    >
+                      {commentLoading ? <ClipLoader color="white" size={14} /> : 'Comment'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </form>
+
+            {/* Comments List Feed */}
+            {commentsFetching ? (
+              <div className="flex justify-center py-6">
+                <ClipLoader color="#9333ea" size={24} />
+              </div>
+            ) : comments.length > 0 ? (
+              <div className="space-y-5 pt-2">
+                {[...comments].reverse().map((comment) => (
+                  <div key={comment._id} className="flex gap-3 group items-start">
+                    
+                    {/* User Avatar */}
+                    <img
+                      src={comment.author?.photoUrl || 'https://via.placeholder.com/150'}
+                      alt={comment.author?.userName}
+                      className="w-10 h-10 rounded-full object-cover border border-[#2d2d2d]"
+                    />
+
+                    {/* Comment Body */}
+                    <div className="flex-1 space-y-1 overflow-hidden">
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="font-bold text-white truncate max-w-[150px]">
+                          {comment.author?.userName || 'Anonymous'}
+                        </span>
+                        <span className="text-gray-500">
+                          {new Date(comment.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-300 leading-relaxed break-words">
+                        {comment.message}
+                      </p>
+                    </div>
+
+                    {/* Delete Action Button */}
+                    {userData && comment.author?._id === userData._id && (
+                      <button
+                        onClick={() => handleDeleteComment(comment._id)}
+                        className="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition p-1.5 rounded-full hover:bg-red-500/10 cursor-pointer self-center"
+                        title="Delete Comment"
+                      >
+                        <FaTrash size={12} />
+                      </button>
+                    )}
+
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic text-center py-6">No comments yet. Be the first to share your thoughts!</p>
+            )}
+
           </div>
 
         </div>

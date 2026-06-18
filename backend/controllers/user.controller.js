@@ -121,3 +121,63 @@ export const getChannelData = async (req, res) => {
         return res.status(500).json({ message: `Failed to get channel data: ${error}` })
     }
 }
+
+export const toggleSubscribeChannel = async (req, res) => {
+    try {
+        const { channelId } = req.params
+        const userId = req.userId
+
+        const channel = await Channel.findById(channelId)
+        if (!channel) {
+            return res.status(404).json({ message: "Channel not found" })
+        }
+
+        if (channel.owner.toString() === userId) {
+            return res.status(400).json({ message: "You cannot subscribe to your own channel" })
+        }
+
+        const isSubscribed = channel.subscribers.includes(userId)
+        if (isSubscribed) {
+            channel.subscribers.pull(userId)
+        } else {
+            channel.subscribers.push(userId)
+        }
+
+        await channel.save()
+
+        return res.status(200).json({
+            message: isSubscribed ? "Unsubscribed successfully" : "Subscribed successfully",
+            subscribersCount: channel.subscribers.length,
+            isSubscribed: !isSubscribed,
+            subscribers: channel.subscribers
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Error toggling subscription state" })
+    }
+}
+
+export const getChannelById = async (req, res) => {
+    try {
+        const { channelId } = req.params
+        const channel = await Channel.findById(channelId).populate({
+            path: "videos",
+            populate: {
+                path: "channel",
+                select: "name avatar"
+            }
+        })
+
+        if (!channel) {
+            return res.status(404).json({ message: "Channel not found" })
+        }
+
+        return res.status(200).json({
+            message: "Channel data fetched successfully",
+            channel
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: `Failed to get channel: ${error}` })
+    }
+}

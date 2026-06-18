@@ -27,6 +27,7 @@ function Home() {
   const location = useLocation();
   const { userData } = useSelector((state) => state.user);
   const [popup, setPopup] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const categories = [
     "Music",
@@ -70,21 +71,37 @@ function Home() {
           </div>
 
           {/* Search */}
-          <div className="hidden md:flex items-center gap-2 flex-1 max-w-xl">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim()) {
+                navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+              }
+            }}
+            className="hidden md:flex items-center gap-2 flex-1 max-w-xl"
+          >
             <div className="flex flex-1">
               <input
                 type="text"
-                className="flex-1 bg-[#121212] px-4 py-2 rounded-l-full outline-none border border-gray-700"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 bg-[#121212] px-4 py-2 rounded-l-full outline-none border border-gray-700 text-white"
                 placeholder="Search"
               />
-              <button className="bg-[#272727] px-4 py-2 rounded-r-full border border-gray-700">
+              <button
+                type="submit"
+                className="bg-[#272727] px-4 py-2 rounded-r-full border border-gray-700 cursor-pointer"
+              >
                 <FaSearch />
               </button>
             </div>
-            <button className="bg-[#272727] p-3 rounded-full">
+            <button
+              type="button"
+              className="bg-[#272727] p-3 rounded-full"
+            >
               <FaMicrophone />
             </button>
-          </div>
+          </form>
 
           {/* Right */}
           <div className="flex items-center gap-3">
