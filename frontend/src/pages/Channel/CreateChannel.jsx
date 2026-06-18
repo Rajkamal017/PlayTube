@@ -52,7 +52,6 @@ const CreateChannel = () => {
       console.log(result.data);
       showCustomAlert("Channel Created");
       navigate("/");
-      
     } catch (error) {
       setLoading(false);
       console.log(error);
@@ -225,7 +224,11 @@ const CreateChannel = () => {
                 disabled={!description || !category || loading}
                 className="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 transition py-3 rounded-lg font medium disabled:bg-gray-600"
               >
-                {loading ? <ClipLoader color="black" size={20}/> : "Save and Create Channel"}
+                {loading ? (
+                  <ClipLoader color="black" size={20} />
+                ) : (
+                  "Save and Create Channel"
+                )}
               </button>
               <span
                 className="w-full flex items-center justify-center text-sm text-blue-400 cursor-pointer hover:underline mt-2"

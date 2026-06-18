@@ -89,7 +89,10 @@ function Home() {
           {/* Right */}
           <div className="flex items-center gap-3">
             {userData?.channel && (
-              <button className="hidden md:flex items-center gap-1 bg-[#1f1f1f] px-3 py-1 rounded-full cursor-pointer" onClick={()=>navigate("/create")}>
+              <button
+                className="hidden md:flex items-center gap-1 bg-[#1f1f1f] px-3 py-1 rounded-full cursor-pointer"
+                onClick={() => navigate("/create")}
+              >
                 <span className="text-lg ">+</span>
                 <span>Create</span>
               </button>
@@ -230,7 +233,10 @@ function Home() {
           icon={<IoIosAddCircle size={40} />}
           active={active === "+"}
           on
-          onClick={() => {setActive("+"); navigate("/create")}}
+          onClick={() => {
+            setActive("+");
+            navigate("/create");
+          }}
         />
         <MobileSizeNav
           icon={<MdOutlineSubscriptions />}

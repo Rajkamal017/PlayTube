@@ -1,20 +1,26 @@
-import React, { useState, useRef } from 'react';
-import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { FaPlay, FaCloudUploadAlt, FaTimes, FaTags, FaInfoCircle } from 'react-icons/fa';
-import { ClipLoader } from 'react-spinners';
-import { serverUrl } from '../../config';
-import { showCustomAlert } from '../../components/CustomeAlert';
+import React, { useState, useRef } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import {
+  FaPlay,
+  FaCloudUploadAlt,
+  FaTimes,
+  FaTags,
+  FaInfoCircle,
+} from "react-icons/fa";
+import { ClipLoader } from "react-spinners";
+import { serverUrl } from "../../config";
+import { showCustomAlert } from "../../components/CustomeAlert";
 
 const CreateShorts = () => {
   const { channelData } = useSelector((state) => state.user);
   const navigate = useNavigate();
 
   const [shortFile, setShortFile] = useState(null);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [tagInput, setTagInput] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState([]);
 
   // ye state upload area ko active krne k liye use hoti hain
@@ -24,19 +30,19 @@ const CreateShorts = () => {
 
   const fileInputRef = useRef(null);
 
-  // ye handleFileChange function video ko select krne k liye use hota hain 
+  // ye handleFileChange function video ko select krne k liye use hota hain
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (file.type.startsWith('video/')) {
+      if (file.type.startsWith("video/")) {
         setShortFile(file);
       } else {
-        showCustomAlert('Please select a valid video file for your Short.');
+        showCustomAlert("Please select a valid video file for your Short.");
       }
     }
   };
 
-  // mtlb user jab short video ko upload area k upr drag krta hain to ye function rokta hain or set krta hain drag state ko true     
+  // mtlb user jab short video ko upload area k upr drag krta hain to ye function rokta hain or set krta hain drag state ko true
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -54,27 +60,27 @@ const CreateShorts = () => {
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
-      if (file.type.startsWith('video/')) {
+      if (file.type.startsWith("video/")) {
         setShortFile(file);
       } else {
-        showCustomAlert('Please select a valid video file.');
+        showCustomAlert("Please select a valid video file.");
       }
     }
   };
 
   // Tag inputs
   const handleTagKeyDown = (e) => {
-    if (e.key === 'Enter' || e.key === ',') {
+    if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
       addTag();
     }
   };
 
   const addTag = () => {
-    const cleanTag = tagInput.trim().replace(/,/g, '');
+    const cleanTag = tagInput.trim().replace(/,/g, "");
     if (cleanTag && !tags.includes(cleanTag)) {
       setTags([...tags, cleanTag]);
-      setTagInput('');
+      setTagInput("");
     }
   };
 
@@ -87,24 +93,24 @@ const CreateShorts = () => {
     e.preventDefault();
 
     if (!shortFile) {
-      showCustomAlert('Please select a video for your Short.');
+      showCustomAlert("Please select a video for your Short.");
       return;
     }
     if (!title.trim()) {
-      showCustomAlert('Please enter a title for your Short.');
+      showCustomAlert("Please enter a title for your Short.");
       return;
     }
     if (!channelData?._id) {
-      showCustomAlert('You need a channel to create shorts.');
+      showCustomAlert("You need a channel to create shorts.");
       return;
     }
 
     const formData = new FormData();
-    formData.append('title', title.trim());
-    formData.append('description', description.trim());
-    formData.append('shortUrl', shortFile); // Must be 'shortUrl' to match backend upload.single("shortUrl")
-    formData.append('tags', JSON.stringify(tags));
-    formData.append('channelId', channelData._id);
+    formData.append("title", title.trim());
+    formData.append("description", description.trim());
+    formData.append("shortUrl", shortFile); // Must be 'shortUrl' to match backend upload.single("shortUrl")
+    formData.append("tags", JSON.stringify(tags));
+    formData.append("channelId", channelData._id);
 
     setLoading(true);
     setUploadProgress(0);
@@ -116,20 +122,26 @@ const CreateShorts = () => {
         {
           withCredentials: true,
           onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total,
+            );
             setUploadProgress(percentCompleted);
-          }
-        }
+          },
+        },
       );
 
       setLoading(false);
-      showCustomAlert(response.data.message || 'Short video uploaded successfully!');
-      navigate('/viewchannel');
+      showCustomAlert(
+        response.data.message || "Short video uploaded successfully!",
+      );
+      navigate("/viewchannel");
     } catch (error) {
       setLoading(false);
       setUploadProgress(0);
       console.error(error);
-      const errorMsg = error.response?.data?.message || 'Error occurred while uploading Short.';
+      const errorMsg =
+        error.response?.data?.message ||
+        "Error occurred while uploading Short.";
       showCustomAlert(errorMsg);
     }
   };
@@ -143,20 +155,23 @@ const CreateShorts = () => {
             <FaInfoCircle size={32} />
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold tracking-tight">Channel Required</h2>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Channel Required
+            </h2>
             <p className="text-gray-400 text-sm leading-relaxed">
-              You must create a channel before you can post short-form video content to PlayTube.
+              You must create a channel before you can post short-form video
+              content to PlayTube.
             </p>
           </div>
           <div className="pt-2 flex flex-col gap-3">
             <button
-              onClick={() => navigate('/createchannel')}
+              onClick={() => navigate("/createchannel")}
               className="w-full bg-purple-600 hover:bg-purple-700 active:bg-purple-800 transition duration-200 py-3 rounded-xl font-semibold text-white shadow-lg cursor-pointer"
             >
               Create Channel Now
             </button>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate("/")}
               className="w-full bg-transparent hover:bg-white/5 text-gray-400 hover:text-white transition duration-200 py-3 rounded-xl font-medium cursor-pointer"
             >
               Back to Home
@@ -170,25 +185,31 @@ const CreateShorts = () => {
   return (
     <div className="w-full min-h-screen bg-[#0f0f0f] text-white flex flex-col pt-16 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto w-full space-y-8">
-        
         {/* Header */}
         <div className="border-b border-[#2d2d2d] pb-5">
           <h1 className="text-3xl font-extrabold tracking-tight bg-linear-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
             Create Short
           </h1>
           <p className="text-gray-400 mt-1 text-sm">
-            Publish vertical videos under 60 seconds. Channel: <span className="text-purple-400 font-semibold">{channelData?.name}</span>
+            Publish vertical videos under 60 seconds. Channel:{" "}
+            <span className="text-purple-400 font-semibold">
+              {channelData?.name}
+            </span>
           </p>
         </div>
 
         {/* Form Grid */}
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-8">
-          
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 md:grid-cols-12 gap-8"
+        >
           {/* Left Panel: 9:16 Video Preview Block */}
           <div className="md:col-span-5 flex flex-col items-center">
             <div className="w-full max-w-sm space-y-2">
-              <label className="text-sm font-semibold text-gray-300 block">Short Video (9:16 vertical)</label>
-              
+              <label className="text-sm font-semibold text-gray-300 block">
+                Short Video (9:16 vertical)
+              </label>
+
               {/* this whole div is the main part of the left panel where we upload the short video */}
               <div
                 onDragEnter={handleDrag}
@@ -198,10 +219,10 @@ const CreateShorts = () => {
                 onClick={() => fileInputRef.current.click()}
                 className={`relative border-2 border-dashed rounded-3xl flex flex-col items-center justify-center cursor-pointer transition duration-300 group overflow-hidden w-full aspect-[9/16] max-h-[500px] ${
                   dragActive
-                    ? 'border-purple-500 bg-purple-500/10'
+                    ? "border-purple-500 bg-purple-500/10"
                     : shortFile
-                    ? 'border-emerald-600 bg-[#121212]'
-                    : 'border-gray-700 bg-[#161616] hover:border-purple-500/50 hover:bg-[#1a1a1a]'
+                      ? "border-emerald-600 bg-[#121212]"
+                      : "border-gray-700 bg-[#161616] hover:border-purple-500/50 hover:bg-[#1a1a1a]"
                 }`}
               >
                 <input
@@ -223,7 +244,10 @@ const CreateShorts = () => {
                       autoPlay
                     />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/video:opacity-100 flex flex-col items-center justify-center transition duration-200">
-                      <FaPlay size={28} className="text-purple-400 mb-2 animate-pulse" />
+                      <FaPlay
+                        size={28}
+                        className="text-purple-400 mb-2 animate-pulse"
+                      />
                       <span className="text-xs bg-purple-600 px-3 py-1.5 rounded-full font-semibold">
                         Change Video
                       </span>
@@ -260,19 +284,24 @@ const CreateShorts = () => {
                     </span>
                   </div>
                 )}
-
               </div>
             </div>
           </div>
 
           {/* Right Panel: Fields */}
           <div className="md:col-span-7 space-y-6 bg-[#161616] border border-[#262626] p-6 sm:p-8 rounded-2xl shadow-xl self-start">
-            
             {/* Title */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <label htmlFor="title-input" className="text-sm font-semibold text-gray-300">Title (required)</label>
-                <span className={`text-xs ${title.length > 90 ? 'text-amber-400' : 'text-gray-500'}`}>
+                <label
+                  htmlFor="title-input"
+                  className="text-sm font-semibold text-gray-300"
+                >
+                  Title (required)
+                </label>
+                <span
+                  className={`text-xs ${title.length > 90 ? "text-amber-400" : "text-gray-500"}`}
+                >
                   {title.length} / 100
                 </span>
               </div>
@@ -290,8 +319,15 @@ const CreateShorts = () => {
             {/* Description */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <label htmlFor="desc-textarea" className="text-sm font-semibold text-gray-300">Description</label>
-                <span className={`text-xs ${description.length > 4800 ? 'text-amber-400' : 'text-gray-500'}`}>
+                <label
+                  htmlFor="desc-textarea"
+                  className="text-sm font-semibold text-gray-300"
+                >
+                  Description
+                </label>
+                <span
+                  className={`text-xs ${description.length > 4800 ? "text-amber-400" : "text-gray-500"}`}
+                >
                   {description.length} / 5000
                 </span>
               </div>
@@ -308,7 +344,10 @@ const CreateShorts = () => {
 
             {/* Tags */}
             <div className="space-y-2">
-              <label htmlFor="tags-input" className="text-sm font-semibold text-gray-300 flex items-center gap-1.5">
+              <label
+                htmlFor="tags-input"
+                className="text-sm font-semibold text-gray-300 flex items-center gap-1.5"
+              >
                 <FaTags size={14} className="text-gray-400" />
                 Tags
               </label>
@@ -356,7 +395,9 @@ const CreateShorts = () => {
               <div className="space-y-2 pt-2">
                 <div className="flex justify-between items-center text-xs text-gray-400">
                   <span>Uploading files...</span>
-                  <span className="font-semibold text-purple-400">{uploadProgress}%</span>
+                  <span className="font-semibold text-purple-400">
+                    {uploadProgress}%
+                  </span>
                 </div>
                 <div className="w-full bg-[#0f0f0f] h-2 rounded-full overflow-hidden border border-gray-800">
                   <div
@@ -386,18 +427,15 @@ const CreateShorts = () => {
 
               <button
                 type="button"
-                onClick={() => navigate('/create')}
+                onClick={() => navigate("/create")}
                 disabled={loading}
                 className="px-6 bg-[#212121] hover:bg-[#2b2b2b] text-gray-300 hover:text-white transition py-3.5 rounded-xl font-semibold border border-gray-800 disabled:opacity-50 cursor-pointer"
               >
                 Cancel
               </button>
             </div>
-
           </div>
-
         </form>
-
       </div>
     </div>
   );

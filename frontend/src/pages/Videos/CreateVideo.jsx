@@ -1,22 +1,34 @@
-import React, { useState, useRef } from 'react';
-import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { FaVideo, FaCloudUploadAlt, FaTimes, FaImage, FaTags, FaInfoCircle } from 'react-icons/fa';
-import { ClipLoader } from 'react-spinners';
-import { serverUrl } from '../../config';
-import { showCustomAlert } from '../../components/CustomeAlert';
+import React, { useState, useRef } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import {
+  FaVideo,
+  FaCloudUploadAlt,
+  FaTimes,
+  FaImage,
+  FaTags,
+  FaInfoCircle,
+} from "react-icons/fa";
+import { ClipLoader } from "react-spinners";
+import { serverUrl } from "../../config";
+import { showCustomAlert } from "../../components/CustomeAlert";
+import { useDispatch } from "react-redux";
+import { setAllVideosData } from "../../Redux/contentSlice";
 
 const CreateVideo = () => {
   const { channelData, userData } = useSelector((state) => state.user);
   const navigate = useNavigate();
 
+  const { allVideosData} = useSelector((state) => state.content);
+  const dispatch = useDispatch();
+
   // Form states
-  const [videoFile, setVideoFile] = useState(null); 
+  const [videoFile, setVideoFile] = useState(null);
   const [thumbnailFile, setThumbnailFile] = useState(null);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [tagInput, setTagInput] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState([]);
 
   // Drag and drop states
@@ -35,10 +47,10 @@ const CreateVideo = () => {
   const handleVideoChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (file.type.startsWith('video/')) {
+      if (file.type.startsWith("video/")) {
         setVideoFile(file);
       } else {
-        showCustomAlert('Please select a valid video file.');
+        showCustomAlert("Please select a valid video file.");
       }
     }
   };
@@ -47,10 +59,10 @@ const CreateVideo = () => {
   const handleThumbnailChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (file.type.startsWith('image/')) {
+      if (file.type.startsWith("image/")) {
         setThumbnailFile(file);
       } else {
-        showCustomAlert('Please select a valid image file.');
+        showCustomAlert("Please select a valid image file.");
       }
     }
   };
@@ -72,10 +84,10 @@ const CreateVideo = () => {
     setVideoDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
-      if (file.type.startsWith('video/')) {
+      if (file.type.startsWith("video/")) {
         setVideoFile(file);
       } else {
-        showCustomAlert('Please select a valid video file.');
+        showCustomAlert("Please select a valid video file.");
       }
     }
   };
@@ -97,27 +109,27 @@ const CreateVideo = () => {
     setThumbnailDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
-      if (file.type.startsWith('image/')) {
+      if (file.type.startsWith("image/")) {
         setThumbnailFile(file);
       } else {
-        showCustomAlert('Please select a valid image file.');
+        showCustomAlert("Please select a valid image file.");
       }
     }
   };
 
   // Handle tag creation
   const handleTagKeyDown = (e) => {
-    if (e.key === 'Enter' || e.key === ',') {
+    if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
       addTag();
     }
   };
 
   const addTag = () => {
-    const cleanTag = tagInput.trim().replace(/,/g, '');
+    const cleanTag = tagInput.trim().replace(/,/g, "");
     if (cleanTag && !tags.includes(cleanTag)) {
       setTags([...tags, cleanTag]);
-      setTagInput('');
+      setTagInput("");
     }
   };
 
@@ -130,29 +142,29 @@ const CreateVideo = () => {
     e.preventDefault();
 
     if (!videoFile) {
-      showCustomAlert('Please upload a video file.');
+      showCustomAlert("Please upload a video file.");
       return;
     }
     if (!thumbnailFile) {
-      showCustomAlert('Please upload a thumbnail image.');
+      showCustomAlert("Please upload a thumbnail image.");
       return;
     }
     if (!title.trim()) {
-      showCustomAlert('Please enter a video title.');
+      showCustomAlert("Please enter a video title.");
       return;
     }
     if (!channelData?._id) {
-      showCustomAlert('You need a channel to upload videos.');
+      showCustomAlert("You need a channel to upload videos.");
       return;
     }
 
     const formData = new FormData();
-    formData.append('title', title.trim());
-    formData.append('description', description.trim());
-    formData.append('video', videoFile);
-    formData.append('thumbnail', thumbnailFile);
-    formData.append('tags', JSON.stringify(tags));
-    formData.append('channelId', channelData._id);
+    formData.append("title", title.trim());
+    formData.append("description", description.trim());
+    formData.append("video", videoFile);
+    formData.append("thumbnail", thumbnailFile);
+    formData.append("tags", JSON.stringify(tags));
+    formData.append("channelId", channelData._id);
 
     setLoading(true);
     setUploadProgress(0);
@@ -164,21 +176,32 @@ const CreateVideo = () => {
         {
           withCredentials: true,
           onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total,
+            );
             setUploadProgress(percentCompleted);
-          }
-        }
+          },
+        },
       );
 
-      console.log('Upload completed successfully! Response:', response.data);
+      console.log("Upload completed successfully! Response:", response.data);
       setLoading(false);
-      showCustomAlert(response.data.message || 'Video uploaded successfully!');
-      navigate('/viewchannel');
+      showCustomAlert(response.data.message || "Video uploaded successfully!");
+      navigate("/viewchannel");
+      dispatch(setAllVideosData([response.data.video]));
+      const updatechannel= {
+        ...channelData ,videos : [...(channelData.videos || []), response.data]
+      }
     } catch (error) {
       setLoading(false);
       setUploadProgress(0);
-      console.error('Upload failed. Error:', error.response?.data || error.message);
-      const errorMsg = error.response?.data?.message || 'Error occurred while uploading the video.';
+      console.error(
+        "Upload failed. Error:",
+        error.response?.data || error.message,
+      );
+      const errorMsg =
+        error.response?.data?.message ||
+        "Error occurred while uploading the video.";
       showCustomAlert(errorMsg);
     }
   };
@@ -192,20 +215,23 @@ const CreateVideo = () => {
             <FaInfoCircle size={32} />
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold tracking-tight">Channel Required</h2>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Channel Required
+            </h2>
             <p className="text-gray-400 text-sm leading-relaxed">
-              You must create a channel before you can upload videos to PlayTube. Setting up a channel only takes a minute!
+              You must create a channel before you can upload videos to
+              PlayTube. Setting up a channel only takes a minute!
             </p>
           </div>
           <div className="pt-2 flex flex-col gap-3">
             <button
-              onClick={() => navigate('/createchannel')}
+              onClick={() => navigate("/createchannel")}
               className="w-full bg-purple-600 hover:bg-purple-700 active:bg-purple-800 transition duration-200 py-3 rounded-xl font-semibold text-white shadow-lg cursor-pointer"
             >
               Create Channel Now
             </button>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate("/")}
               className="w-full bg-transparent hover:bg-white/5 text-gray-400 hover:text-white transition duration-200 py-3 rounded-xl font-medium cursor-pointer"
             >
               Back to Home
@@ -219,27 +245,32 @@ const CreateVideo = () => {
   return (
     <div className="w-full min-h-screen bg-[#0f0f0f] text-white flex flex-col pt-16 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto w-full space-y-8">
-        
         {/* Header */}
         <div className="border-b border-[#2d2d2d] pb-5">
           <h1 className="text-3xl font-extrabold tracking-tight bg-linear-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
             Upload Video
           </h1>
           <p className="text-gray-400 mt-1 text-sm">
-            Publish high-quality video content to your channel: <span className="text-purple-400 font-semibold">{channelData?.name}</span>
+            Publish high-quality video content to your channel:{" "}
+            <span className="text-purple-400 font-semibold">
+              {channelData?.name}
+            </span>
           </p>
         </div>
 
         {/* Form Container */}
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-8"
+        >
           {/* Left Column - Media upload (Span 5) */}
           <div className="lg:col-span-5 space-y-6">
-            
             {/* Video Upload Area */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-300 block">Video File</label>
-              
+              <label className="text-sm font-semibold text-gray-300 block">
+                Video File
+              </label>
+
               <div
                 onDragEnter={handleVideoDrag}
                 onDragOver={handleVideoDrag}
@@ -248,10 +279,10 @@ const CreateVideo = () => {
                 onClick={() => videoInputRef.current.click()}
                 className={`relative border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer transition duration-300 group h-64 overflow-hidden ${
                   videoDragActive
-                    ? 'border-purple-500 bg-purple-500/10'
+                    ? "border-purple-500 bg-purple-500/10"
                     : videoFile
-                    ? 'border-emerald-600 bg-emerald-950/10'
-                    : 'border-gray-700 bg-[#161616] hover:border-purple-500/50 hover:bg-[#1a1a1a]'
+                      ? "border-emerald-600 bg-emerald-950/10"
+                      : "border-gray-700 bg-[#161616] hover:border-purple-500/50 hover:bg-[#1a1a1a]"
                 }`}
               >
                 <input
@@ -312,8 +343,10 @@ const CreateVideo = () => {
 
             {/* Thumbnail Upload Area */}
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-300 block">Thumbnail</label>
-              
+              <label className="text-sm font-semibold text-gray-300 block">
+                Thumbnail
+              </label>
+
               <div
                 onDragEnter={handleThumbnailDrag}
                 onDragOver={handleThumbnailDrag}
@@ -322,10 +355,10 @@ const CreateVideo = () => {
                 onClick={() => thumbnailInputRef.current.click()}
                 className={`relative border-2 border-dashed rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer transition duration-300 group h-48 overflow-hidden ${
                   thumbnailDragActive
-                    ? 'border-purple-500 bg-purple-500/10'
+                    ? "border-purple-500 bg-purple-500/10"
                     : thumbnailFile
-                    ? 'border-emerald-600'
-                    : 'border-gray-700 bg-[#161616] hover:border-purple-500/50 hover:bg-[#1a1a1a]'
+                      ? "border-emerald-600"
+                      : "border-gray-700 bg-[#161616] hover:border-purple-500/50 hover:bg-[#1a1a1a]"
                 }`}
               >
                 <input
@@ -376,17 +409,22 @@ const CreateVideo = () => {
                 )}
               </div>
             </div>
-
           </div>
 
           {/* Right Column - Text Details & Metadata (Span 7) */}
           <div className="lg:col-span-7 space-y-6 bg-[#161616] border border-[#262626] p-6 sm:p-8 rounded-2xl shadow-xl">
-            
             {/* Title Input */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <label htmlFor="title-input" className="text-sm font-semibold text-gray-300">Title (required)</label>
-                <span className={`text-xs ${title.length > 90 ? 'text-amber-400' : 'text-gray-500'}`}>
+                <label
+                  htmlFor="title-input"
+                  className="text-sm font-semibold text-gray-300"
+                >
+                  Title (required)
+                </label>
+                <span
+                  className={`text-xs ${title.length > 90 ? "text-amber-400" : "text-gray-500"}`}
+                >
                   {title.length} / 100
                 </span>
               </div>
@@ -404,8 +442,15 @@ const CreateVideo = () => {
             {/* Description Textarea */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <label htmlFor="desc-textarea" className="text-sm font-semibold text-gray-300">Description</label>
-                <span className={`text-xs ${description.length > 4800 ? 'text-amber-400' : 'text-gray-500'}`}>
+                <label
+                  htmlFor="desc-textarea"
+                  className="text-sm font-semibold text-gray-300"
+                >
+                  Description
+                </label>
+                <span
+                  className={`text-xs ${description.length > 4800 ? "text-amber-400" : "text-gray-500"}`}
+                >
                   {description.length} / 5000
                 </span>
               </div>
@@ -422,11 +467,14 @@ const CreateVideo = () => {
 
             {/* Tags Chip Input */}
             <div className="space-y-2">
-              <label htmlFor="tags-input" className="text-sm font-semibold text-gray-300 flex items-center gap-1.5">
+              <label
+                htmlFor="tags-input"
+                className="text-sm font-semibold text-gray-300 flex items-center gap-1.5"
+              >
                 <FaTags size={14} className="text-gray-400" />
                 Tags
               </label>
-              
+
               <div className="flex flex-wrap gap-2 mb-2">
                 {tags.map((tag, idx) => (
                   <span
@@ -470,7 +518,9 @@ const CreateVideo = () => {
               <div className="space-y-2 pt-2">
                 <div className="flex justify-between items-center text-xs text-gray-400">
                   <span>Uploading files...</span>
-                  <span className="font-semibold text-purple-400">{uploadProgress}%</span>
+                  <span className="font-semibold text-purple-400">
+                    {uploadProgress}%
+                  </span>
                 </div>
                 <div className="w-full bg-[#0f0f0f] h-2 rounded-full overflow-hidden border border-gray-800">
                   <div
@@ -500,16 +550,14 @@ const CreateVideo = () => {
 
               <button
                 type="button"
-                onClick={() => navigate('/create')}
+                onClick={() => navigate("/create")}
                 disabled={loading}
                 className="px-6 bg-[#212121] hover:bg-[#2b2b2b] text-gray-300 hover:text-white transition py-3.5 rounded-xl font-semibold border border-gray-800 disabled:opacity-50 cursor-pointer"
               >
                 Cancel
               </button>
             </div>
-
           </div>
-
         </form>
       </div>
     </div>

@@ -8,7 +8,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { serverUrl } from "../config.js";
 import { showCustomAlert } from "../components/CustomeAlert.jsx";
 import { useDispatch } from "react-redux";
-import { setUserData } from "../redux/userSlice.js";
+import { setUserData } from "../Redux/userSlice.js";
 
 const SignUp = () => {
   const [step, setStep] = useState(1);
@@ -21,7 +21,7 @@ const SignUp = () => {
   const [frontendImage, setFrontendImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const handleNext = () => {
     if (step == 1) {
@@ -68,7 +68,7 @@ const SignUp = () => {
         { withCredentials: true },
       );
       console.log(result.data);
-      dispatch(setUserData(result.data))
+      dispatch(setUserData(result.data));
       navigate("/");
       setLoading(false);
       showCustomAlert("Account Created");

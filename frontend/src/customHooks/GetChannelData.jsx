@@ -1,9 +1,9 @@
-import axios from 'axios';
-import React from 'react'
-import { useDispatch } from 'react-redux';
-import { serverUrl } from '../config';
-import { setChannelData } from '../redux/userSlice';
-import { useEffect } from 'react';
+import axios from "axios";
+import React from "react";
+import { useDispatch } from "react-redux";
+import { serverUrl } from "../config";
+import { setChannelData } from "../redux/userSlice";
+import { useEffect } from "react";
 
 const GetChannelData = () => {
   const dispatch = useDispatch();
@@ -15,7 +15,7 @@ const GetChannelData = () => {
           withCredentials: true,
         });
         dispatch(setChannelData(result.data));
-        console.log(result.data);
+        // console.log(result.data);
       } catch (error) {
         console.log(error);
         dispatch(setChannelData(null));
@@ -23,6 +23,6 @@ const GetChannelData = () => {
     };
     fetchChannel();
   }, [dispatch]);
-}
+};
 
-export default GetChannelData
+export default GetChannelData;

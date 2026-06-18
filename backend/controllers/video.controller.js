@@ -66,3 +66,17 @@ export const createVideo = async (req, res) => {
         return res.status(500).json({ message: "error occur while uploading" })
     }
 }
+
+
+export const getAllVideos = async (req, res) => {
+    try {
+        const videos = await Video.find().populate("channel")
+        return res.status(200).json({
+            message: "Videos fetched successfully",
+            videos
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Error occur while fetching videos" })
+    }
+}

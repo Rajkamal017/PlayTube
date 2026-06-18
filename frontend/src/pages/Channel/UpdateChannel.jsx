@@ -8,7 +8,7 @@ import axios from "axios";
 import { serverUrl } from "../../config.js";
 import { showCustomAlert } from "../../components/CustomeAlert";
 import { ClipLoader } from "react-spinners";
-import { setChannelData } from "../../redux/userSlice.js";
+import { setChannelData } from "../../Redux/userSlice.js";
 
 const UpdateChannel = () => {
   const { channelData } = useSelector((state) => state.user);
@@ -19,7 +19,7 @@ const UpdateChannel = () => {
   const [description, setDescription] = useState(channelData?.description);
   const [category, setCategory] = useState(channelData?.category);
   const [loading, setLoading] = useState(false);
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleAvatar = (e) => {
@@ -53,7 +53,7 @@ const UpdateChannel = () => {
       );
       setLoading(false);
       console.log(result.data);
-      dispatch(setChannelData(result.data))
+      dispatch(setChannelData(result.data));
       showCustomAlert("Channel Updated");
       navigate("/");
     } catch (error) {

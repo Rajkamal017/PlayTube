@@ -8,7 +8,7 @@ import axios from "axios";
 import { serverUrl } from "../config";
 import ClipLoader from "react-spinners/ClipLoader";
 import { useDispatch } from "react-redux";
-import { setUserData } from "../redux/userSlice";
+import { setUserData } from "../Redux/userSlice";
 
 const SignIn = () => {
   const [step, setStep] = useState(1);
@@ -147,7 +147,10 @@ const SignIn = () => {
               </label>
             </div>
             <div className="flex justify-between items-center mt-1">
-              <button className="text-purple-400 text-sm hover:underline" onClick={()=>navigate("/forgetpass")}>
+              <button
+                className="text-purple-400 text-sm hover:underline"
+                onClick={() => navigate("/forgetpass")}
+              >
                 Forget Password
               </button>
               <button

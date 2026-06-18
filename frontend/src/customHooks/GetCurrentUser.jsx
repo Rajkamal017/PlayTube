@@ -2,11 +2,11 @@ import React, { useEffect } from "react";
 import axios from "axios";
 import { serverUrl } from "../config";
 import { useDispatch, useSelector } from "react-redux";
-import { setUserData } from "../redux/userSlice";
+import { setUserData } from "../Redux/userSlice";
 
 const GetCurrentUser = () => {
   const dispatch = useDispatch();
-  const {channelData} = useSelector(state=>state.user)
+  const { channelData } = useSelector((state) => state.user);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -15,7 +15,7 @@ const GetCurrentUser = () => {
           withCredentials: true,
         });
         dispatch(setUserData(result.data));
-        console.log(result.data);
+        // console.log(result.data);
       } catch (error) {
         console.log(error);
         dispatch(setUserData(null));
