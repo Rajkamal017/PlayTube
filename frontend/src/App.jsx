@@ -20,6 +20,7 @@ import CreatePlaylist from "./pages/Playlist/CreatePlaylist";
 import CreatePost from "./pages/Post/CreatePost";
 import CreateShorts from "./pages/Shorts/CreateShorts";
 import GetAllContentData from "./customHooks/GetAllContentData";
+import WatchVideo from "./pages/Videos/WatchVideo";
 
 const ProtectRoute = ({ userData, children }) => {
   if (!userData) {
@@ -40,6 +41,7 @@ const App = () => {
       <CustomeAlert />
       <Routes>
         <Route path="/" element={<Home />}>
+          <Route path="/watch/:videoId" element={<WatchVideo />} />
           <Route
             path="/shorts"
             element={

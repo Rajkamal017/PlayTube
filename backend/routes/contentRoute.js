@@ -1,5 +1,5 @@
 import express from 'express'
-import { createVideo, getAllVideos } from '../controllers/video.controller.js'
+import { createVideo, getAllVideos, getVideoById } from '../controllers/video.controller.js'
 import { createShort, getAllShorts } from '../controllers/short.controller.js'
 import isAuth from '../middlewares/isAuth.js'
 import upload from '../middlewares/multer.js'
@@ -15,6 +15,7 @@ contentRouter.post("/create-video", isAuth, upload.fields([
 
 // Videos Retrieve
 contentRouter.get("/get-all-videos", getAllVideos)
+contentRouter.get("/video/:videoId", getVideoById)
 
 
 // Shorts Create/Retrieve

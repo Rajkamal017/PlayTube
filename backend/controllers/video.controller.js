@@ -80,3 +80,27 @@ export const getAllVideos = async (req, res) => {
         return res.status(500).json({ message: "Error occur while fetching videos" })
     }
 }
+
+
+export const getVideoById = async (req, res) => {
+    try {
+        const { videoId } = req.params
+        const video = await Video.findByIdAndUpdate(
+            videoId,
+            { $inc: { views: 1 } },
+            { new: true }
+        ).populate("channel")
+
+        if (!video) {
+            return res.status(404).json({ message: "Video not found" })
+        }
+
+        return res.status(200).json({
+            message: "Video fetched successfully",
+            video
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Error occurred while fetching video details" })
+    }
+}
