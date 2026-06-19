@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { ClipLoader } from "react-spinners";
@@ -17,7 +17,9 @@ const ChannelPage = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscribersCount, setSubscribersCount] = useState(0);
   const [subscribeLoading, setSubscribeLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("Videos");
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(tabParam || "Videos");
 
   // Edit / Delete Modal State
   const [selectedVideo, setSelectedVideo] = useState(null);
@@ -193,6 +195,13 @@ const ChannelPage = () => {
       setDeletingPost(false);
     }
   };
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (activeTab === "Posts") {

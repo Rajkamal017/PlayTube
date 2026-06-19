@@ -27,7 +27,7 @@ function Home() {
   const [active, setActive] = useState("Home");
   const navigate = useNavigate();
   const location = useLocation();
-  const { userData } = useSelector((state) => state.user);
+  const { userData, channelData } = useSelector((state) => state.user);
   const { allVideosData } = useSelector((state) => state.content);
   const [popup, setPopup] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -189,7 +189,20 @@ function Home() {
             text={"Playlists"}
             open={sidebarOpen}
             selected={selectedItem === "Playlists"}
-            onClick={() => setSelectedItem("Playlists")}
+            onClick={() => {
+              if (!userData) {
+                showCustomAlert("Please sign in to view your playlists.");
+                return;
+              }
+              const userChannelId = userData.channel || (channelData && channelData._id);
+              if (!userChannelId) {
+                showCustomAlert("Please create a channel first to view your playlists.");
+                navigate("/createchannel");
+                return;
+              }
+              setSelectedItem("Playlists");
+              navigate(`/channel/${userChannelId}?tab=Playlists`);
+            }}
           />
           <SidebarItem
             icon={<FaBookmark />}
