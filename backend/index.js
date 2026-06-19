@@ -17,7 +17,10 @@ app.use(cookieParser())
 app.use(express.json())
 
 app.use(cors({
-    origin:"https://playtube-frontendv1.onrender.com",
+    origin: [
+        "http://localhost:5173",
+        "https://playtube-frontendv1.onrender.com"
+    ],
     credentials: true
 }))
 app.use("/api/auth", authRouter)
