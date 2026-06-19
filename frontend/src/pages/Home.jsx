@@ -120,13 +120,13 @@ function Home() {
             )}
             {!userData?.photoUrl ? (
               <FaUserCircle
-                className="text-3xl hidden md:flex text-gray-400"
+                className="text-3xl hidden md:flex text-gray-400 profile-btn cursor-pointer"
                 onClick={() => setPopup((prev) => !prev)}
               />
             ) : (
               <img
                 src={userData?.photoUrl}
-                className="w-9 h-9 rounded-full object-fit-cover border border-gray-700 hidden md:flex"
+                className="w-9 h-9 rounded-full object-fit-cover border border-gray-700 hidden md:flex profile-btn cursor-pointer"
                 onClick={() => setPopup((prev) => !prev)}
               />
             )}
@@ -345,7 +345,7 @@ function Home() {
             )}
           </div>
         )}
-        {popup && <Profile />}
+        {popup && <Profile onClose={() => setPopup(false)} />}
         <div className="mt-2"></div>
         <Outlet />
       </main>
