@@ -12,6 +12,7 @@ import {
   FaUserCircle,
   FaRegFolderOpen,
   FaBookmark,
+  FaWallet,
 } from "react-icons/fa";
 import { IoIosAddCircle } from "react-icons/io";
 import { GoVideo } from "react-icons/go";
@@ -212,6 +213,16 @@ function Home() {
             onClick={() => {
               setSelectedItem("Save Videos");
               navigate("/saved");
+            }}
+          />
+          <SidebarItem
+            icon={<FaWallet />}
+            text={"Wallet"}
+            open={sidebarOpen}
+            selected={selectedItem === "Wallet"}
+            onClick={() => {
+              setSelectedItem("Wallet");
+              navigate("/wallet");
             }}
           />
           <SidebarItem

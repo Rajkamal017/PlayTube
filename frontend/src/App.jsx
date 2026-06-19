@@ -28,6 +28,7 @@ import LikedVideos from "./pages/Videos/LikedVideos";
 import Subscriptions from "./pages/Videos/Subscriptions";
 import PlaylistDetails from "./pages/Playlist/PlaylistDetails";
 import SavedVideos from "./pages/Videos/SavedVideos";
+import Wallet from "./pages/Videos/Wallet";
 
 
 const ProtectRoute = ({ userData, children }) => {
@@ -74,6 +75,14 @@ const App = () => {
             element={
               <ProtectRoute userData={userData}>
                 <SavedVideos />
+              </ProtectRoute>
+            }
+          />
+          <Route
+            path="/wallet"
+            element={
+              <ProtectRoute userData={userData}>
+                <Wallet />
               </ProtectRoute>
             }
           />

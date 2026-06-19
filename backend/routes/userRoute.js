@@ -1,6 +1,6 @@
 import express from "express"
 import isAuth from "../middlewares/isAuth.js"
-import { createChannel, getChannelData, getCurrentUser, updateChannel, toggleSubscribeChannel, getChannelById, addToWatchHistory, getWatchHistory, getSubscribedChannelsVideos, toggleSaveVideo, getSavedVideos } from "../controllers/user.controller.js"
+import { createChannel, getChannelData, getCurrentUser, updateChannel, toggleSubscribeChannel, getChannelById, addToWatchHistory, getWatchHistory, getSubscribedChannelsVideos, toggleSaveVideo, getSavedVideos, earnVideoReward, tipCreator } from "../controllers/user.controller.js"
 import upload from "../middlewares/multer.js"
 
 
@@ -27,5 +27,9 @@ userRouter.get("/subscriptions/videos", isAuth, getSubscribedChannelsVideos)
 // Saved Videos Routes
 userRouter.post("/save-video/:videoId", isAuth, toggleSaveVideo)
 userRouter.get("/saved-videos", isAuth, getSavedVideos)
+
+// Rewards & Crypto Wallet Routes
+userRouter.post("/earn-reward/:videoId", isAuth, earnVideoReward)
+userRouter.post("/tip-creator", isAuth, tipCreator)
 
 export default userRouter

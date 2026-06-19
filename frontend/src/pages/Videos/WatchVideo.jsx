@@ -2,11 +2,28 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
-import { FaThumbsUp, FaThumbsDown, FaShare, FaBookmark, FaRegThumbsUp, FaRegThumbsDown, FaTrash, FaUserCircle, FaList } from 'react-icons/fa';
+import { FaThumbsUp, FaThumbsDown, FaShare, FaBookmark, FaRegThumbsUp, FaRegThumbsDown, FaTrash, FaUserCircle, FaList, FaCoins } from 'react-icons/fa';
 import { ClipLoader } from 'react-spinners';
 import { serverUrl } from '../../config';
 import { showCustomAlert } from '../../components/CustomeAlert';
-import { setAllVideosData } from '../../redux/contentSlice';
+import { setAllVideosData } from '../../Redux/contentSlice';
+
+const getAmbientGradient = (category) => {
+  switch (category?.toLowerCase()) {
+    case 'gaming':
+      return 'from-[#a855f7]/30 via-[#3b82f6]/20 to-transparent';
+    case 'music':
+      return 'from-[#ec4899]/30 via-[#06b6d4]/20 to-transparent';
+    case 'movies':
+    case 'tv shows':
+      return 'from-[#eab308]/20 via-[#ef4444]/20 to-transparent';
+    case 'science & tech':
+    case 'education':
+      return 'from-[#14b8a6]/30 via-[#10b981]/25 to-transparent';
+    default:
+      return 'from-[#a855f7]/35 via-[#6366f1]/25 to-transparent';
+  }
+};
 
 const WatchVideo = () => {
   const { videoId } = useParams();
@@ -40,6 +57,11 @@ const WatchVideo = () => {
   const [commentLoading, setCommentLoading] = useState(false);
   const [commentsFetching, setCommentsFetching] = useState(true);
   const [inputFocused, setInputFocused] = useState(false);
+
+  // Tipping States
+  const [isTipModalOpen, setIsTipModalOpen] = useState(false);
+  const [tipAmount, setTipAmount] = useState('');
+  const [tipLoading, setTipLoading] = useState(false);
 
   // Fetch active video details
   useEffect(() => {
@@ -312,6 +334,60 @@ const WatchVideo = () => {
     }
   };
 
+  const handleTipCreator = async (e) => {
+    e.preventDefault();
+    if (!userData) {
+      showCustomAlert("Please sign in to tip creators.");
+      return;
+    }
+
+    const amt = parseFloat(tipAmount);
+    if (isNaN(amt) || amt <= 0) {
+      showCustomAlert("Please enter a valid tip amount.");
+      return;
+    }
+
+    setTipLoading(true);
+    try {
+      await axios.post(`${serverUrl}/api/user/tip-creator`, {
+        videoId,
+        amount: amt
+      }, {
+        withCredentials: true,
+      });
+
+      showCustomAlert(`🎉 Successfully tipped ${amt} PTC to creator!`);
+      setIsTipModalOpen(false);
+      setTipAmount("");
+    } catch (error) {
+      console.error("Tipping error:", error);
+      const errorMsg = error.response?.data?.message || "Failed to send tip.";
+      showCustomAlert(errorMsg);
+    } finally {
+      setTipLoading(false);
+    }
+  };
+
+  // Earn crypto rewards after watching for 10 seconds
+  useEffect(() => {
+    if (!userData || !videoId) return;
+
+    const rewardTimer = setTimeout(async () => {
+      try {
+        const response = await axios.post(`${serverUrl}/api/user/earn-reward/${videoId}`, {}, {
+          withCredentials: true,
+        });
+        if (response.status === 200) {
+          showCustomAlert(`🎉 Congratulations! You earned ${response.data.amount} PTC for watching this video.`);
+        }
+      } catch (error) {
+        console.log("Watch reward claim:", error.response?.data?.message || error.message);
+      }
+    }, 10000); // 10 seconds watch time trigger
+
+    return () => clearTimeout(rewardTimer);
+  }, [videoId, userData]);
+
   // Render Loader
   if (loading) {
     return (
@@ -346,15 +422,21 @@ const WatchVideo = () => {
         {/* Left Side: Video Player & Details (8 columns) */}
         <div className="lg:col-span-8 space-y-4">
           
-          {/* Video Player */}
-          <div className="w-full aspect-video rounded-2xl overflow-hidden bg-black border border-gray-800 shadow-2xl">
-            <video
-              src={video.videoUrl}
-              poster={video.thumbnail}
-              className="w-full h-full object-contain"
-              controls
-              autoPlay
-            />
+          {/* Video Player Wrapper with Ambient Glow */}
+          <div className="relative w-full aspect-video rounded-2xl">
+            {/* Ambient Glow Backdrop */}
+            <div className={`absolute inset-0 -z-10 rounded-2xl bg-gradient-to-tr ${getAmbientGradient(video.channel?.category)} blur-[100px] opacity-45 animate-ambient-glow pointer-events-none`} />
+            
+            {/* Video Player */}
+            <div className="w-full h-full rounded-2xl overflow-hidden bg-black border border-gray-800 shadow-2xl relative">
+              <video
+                src={video.videoUrl}
+                poster={video.thumbnail}
+                className="w-full h-full object-contain"
+                controls
+                autoPlay
+              />
+            </div>
           </div>
 
           {/* Title */}
@@ -451,6 +533,17 @@ const WatchVideo = () => {
                 <FaList />
                 <span>Playlist</span>
               </button>
+
+              {/* Tip Creator */}
+              {userData?._id !== video.channel?.owner && (
+                <button
+                  onClick={() => setIsTipModalOpen(true)}
+                  className="flex items-center gap-2 bg-[#1b122e]/60 hover:bg-[#2c1d4a] border border-purple-500/30 text-purple-300 hover:text-white transition py-2 px-4 rounded-full text-sm font-medium cursor-pointer shadow-md shadow-purple-500/5"
+                >
+                  <FaCoins className="text-purple-400" />
+                  <span>Tip</span>
+                </button>
+              )}
 
             </div>
 
@@ -707,7 +800,100 @@ const WatchVideo = () => {
           </div>
         </div>
       )}
+      {/* Tip Creator Modal */}
+      {isTipModalOpen && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#121212] border border-purple-500/25 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl -z-10" />
+            
+            <div className="px-6 py-4 border-b border-gray-800 flex justify-between items-center bg-[#181818]">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <FaCoins className="text-purple-400" />
+                <span>Support Creator</span>
+              </h3>
+              <button
+                onClick={() => {
+                  setIsTipModalOpen(false);
+                  setTipAmount("");
+                }}
+                className="text-gray-400 hover:text-white transition cursor-pointer text-xl font-bold font-sans"
+              >
+                &times;
+              </button>
+            </div>
 
+            <form onSubmit={handleTipCreator} className="p-6 space-y-4">
+              <div className="space-y-1">
+                <p className="text-xs text-gray-400">
+                  Send a crypto tip to <span className="text-purple-400 font-bold">{video.channel?.name}</span> to support their content.
+                </p>
+                <div className="text-[11px] text-gray-500">
+                  Your Balance: <span className="text-gray-300 font-semibold">{userData?.rewardsBalance?.toFixed(1) || 0.0} PTC</span>
+                </div>
+              </div>
+
+              {/* Presets */}
+              <div className="flex gap-2">
+                {[2, 5, 10].map((val) => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => setTipAmount(val.toString())}
+                    className="flex-1 bg-[#1a1a1a] hover:bg-purple-950/30 border border-gray-800 hover:border-purple-500/40 text-gray-300 hover:text-purple-300 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer"
+                  >
+                    {val} PTC
+                  </button>
+                ))}
+              </div>
+
+              {/* Amount Input */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                  Tip Amount (PTC)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0.1"
+                    placeholder="Enter PTC amount"
+                    value={tipAmount}
+                    onChange={(e) => setTipAmount(e.target.value)}
+                    className="w-full bg-[#161616] border border-gray-800 focus:border-purple-500/50 rounded-xl px-4 py-2 text-sm text-white focus:outline-none transition pr-12 font-semibold"
+                    required
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-purple-400">
+                    PTC
+                  </span>
+                </div>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex justify-end gap-3 pt-3 border-t border-gray-800">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsTipModalOpen(false);
+                    setTipAmount("");
+                  }}
+                  className="bg-transparent hover:bg-gray-800 text-gray-400 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={tipLoading || !tipAmount}
+                  className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 text-white px-5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg cursor-pointer"
+                >
+                  {tipLoading ? <ClipLoader color="#ffffff" size={12} /> : null}
+                  {tipLoading ? "Tipping..." : "Send Tip"}
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -28,6 +28,16 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Video"
     }],
+    rewardsBalance: {
+        type: Number,
+        default: 0
+    },
+    rewardsHistory: [{
+        type: { type: String }, // 'watch', 'tip_sent', 'tip_received'
+        amount: { type: Number },
+        detail: { type: String },
+        createdAt: { type: Date, default: Date.now }
+    }],
     resetOtp: { type: String },
     otpExpires: { type: Date },
     isOtpVerified: { type: Boolean, default: false }

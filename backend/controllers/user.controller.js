@@ -317,3 +317,129 @@ export const getSavedVideos = async (req, res) => {
         return res.status(500).json({ message: `Failed to fetch saved videos: ${error}` })
     }
 }
+
+export const earnVideoReward = async (req, res) => {
+    try {
+        const { videoId } = req.params;
+        const userId = req.userId;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const video = await Video.findById(videoId);
+        if (!video) {
+            return res.status(404).json({ message: "Video not found" });
+        }
+
+        // Daily limit check (24 hours window)
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const watchHistoryToday = user.rewardsHistory.filter(history => 
+            history.type === "watch" && history.createdAt >= oneDayAgo
+        );
+
+        if (watchHistoryToday.length >= 5) {
+            return res.status(400).json({ 
+                message: "Daily watch reward limit reached (Max 5 PTC per day)" 
+            });
+        }
+
+        // Duplicate claim for this specific video in the last 24 hours
+        const alreadyClaimed = user.rewardsHistory.some(history => 
+            history.type === "watch" && 
+            history.detail.includes(videoId.toString()) && 
+            history.createdAt >= oneDayAgo
+        );
+
+        if (alreadyClaimed) {
+            return res.status(400).json({ 
+                message: "Reward already claimed for this video in the last 24 hours" 
+            });
+        }
+
+        // Credit PTC
+        const rewardAmount = 1.0;
+        user.rewardsBalance += rewardAmount;
+        user.rewardsHistory.push({
+            type: "watch",
+            amount: rewardAmount,
+            detail: `Earned ${rewardAmount} PTC for watching "${video.title}" (Video ID: ${videoId})`
+        });
+
+        await user.save();
+
+        return res.status(200).json({
+            message: "Reward credited successfully!",
+            rewardsBalance: user.rewardsBalance,
+            amount: rewardAmount
+        });
+    } catch (error) {
+        console.error("earnVideoReward error:", error);
+        return res.status(500).json({ message: `Failed to credit reward: ${error.message}` });
+    }
+};
+
+export const tipCreator = async (req, res) => {
+    try {
+        const { videoId, amount } = req.body;
+        const userId = req.userId;
+
+        const parsedAmount = parseFloat(amount);
+        if (isNaN(parsedAmount) || parsedAmount <= 0) {
+            return res.status(400).json({ message: "Invalid tip amount" });
+        }
+
+        const sender = await User.findById(userId);
+        if (!sender) {
+            return res.status(404).json({ message: "Sender not found" });
+        }
+
+        if (sender.rewardsBalance < parsedAmount) {
+            return res.status(400).json({ message: "Insufficient balance to tip" });
+        }
+
+        const video = await Video.findById(videoId).populate("channel");
+        if (!video || !video.channel) {
+            return res.status(404).json({ message: "Video or Channel not found" });
+        }
+
+        const creatorId = video.channel.owner;
+        if (creatorId.toString() === userId.toString()) {
+            return res.status(400).json({ message: "You cannot tip your own channel" });
+        }
+
+        const creator = await User.findById(creatorId);
+        if (!creator) {
+            return res.status(404).json({ message: "Channel creator not found" });
+        }
+
+        // Process tip transfer
+        sender.rewardsBalance -= parsedAmount;
+        creator.rewardsBalance += parsedAmount;
+
+        sender.rewardsHistory.push({
+            type: "tip_sent",
+            amount: -parsedAmount,
+            detail: `Tipped ${parsedAmount} PTC to creator of "${video.title}"`
+        });
+
+        creator.rewardsHistory.push({
+            type: "tip_received",
+            amount: parsedAmount,
+            detail: `Received ${parsedAmount} PTC tip from viewer for video "${video.title}"`
+        });
+
+        await sender.save();
+        await creator.save();
+
+        return res.status(200).json({
+            message: "Creator tipped successfully!",
+            rewardsBalance: sender.rewardsBalance,
+            amount: parsedAmount
+        });
+    } catch (error) {
+        console.error("tipCreator error:", error);
+        return res.status(500).json({ message: `Failed to process tip: ${error.message}` });
+    }
+};
