@@ -99,10 +99,10 @@ export const googleAuth = async (req, res) => {
             }
         }
 
-        const user = await User.findOne({ email })
+        let user = await User.findOne({ email })
 
         if (!user) {
-            await User.create({
+            user = await User.create({
                 userName,
                 email,
                 photoUrl: googlePhoto
