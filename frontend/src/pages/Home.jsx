@@ -173,7 +173,10 @@ function Home() {
             text={"History"}
             open={sidebarOpen}
             selected={selectedItem === "History"}
-            onClick={() => setSelectedItem("History")}
+            onClick={() => {
+              setSelectedItem("History");
+              navigate("/history");
+            }}
           />
           <SidebarItem
             icon={<FaList />}
@@ -194,7 +197,10 @@ function Home() {
             text={"Liked Videos"}
             open={sidebarOpen}
             selected={selectedItem === "Liked Videos"}
-            onClick={() => setSelectedItem("Liked Videos")}
+            onClick={() => {
+              setSelectedItem("Liked Videos");
+              navigate("/liked");
+            }}
           />
         </nav>
 

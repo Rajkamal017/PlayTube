@@ -1,6 +1,7 @@
 import uploadOnCloudinary from "../config/cloudinary.js"
 import User from "../models/userModel.js"
 import Channel from "../models/channelModel.js"
+import Video from "../models/videoModel.js"
 
 export const getCurrentUser = async (req, res) => {
     try {
@@ -179,5 +180,63 @@ export const getChannelById = async (req, res) => {
     } catch (error) {
         console.log(error)
         return res.status(500).json({ message: `Failed to get channel: ${error}` })
+    }
+}
+
+export const addToWatchHistory = async (req, res) => {
+    try {
+        const { videoId } = req.params
+        const userId = req.userId
+
+        const video = await Video.findById(videoId)
+        if (!video) {
+            return res.status(404).json({ message: "Video not found" })
+        }
+
+        // Remove duplicate to bring it to the front
+        await User.findByIdAndUpdate(userId, {
+            $pull: { watchHistory: videoId }
+        })
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { $push: { watchHistory: videoId } },
+            { new: true }
+        )
+
+        return res.status(200).json({
+            message: "Video added to watch history",
+            watchHistory: user.watchHistory
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: `Failed to add to watch history: ${error}` })
+    }
+}
+
+export const getWatchHistory = async (req, res) => {
+    try {
+        const userId = req.userId
+        const user = await User.findById(userId).populate({
+            path: "watchHistory",
+            populate: {
+                path: "channel",
+                select: "name avatar"
+            }
+        })
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" })
+        }
+
+        const history = [...user.watchHistory].reverse()
+
+        return res.status(200).json({
+            message: "Watch history fetched successfully",
+            history
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: `Failed to fetch watch history: ${error}` })
     }
 }

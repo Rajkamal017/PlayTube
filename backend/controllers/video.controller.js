@@ -270,3 +270,18 @@ export const incrementViewCount = async (req, res) => {
         return res.status(500).json({ message: "Error occurred while incrementing view count" })
     }
 }
+
+export const getLikedVideos = async (req, res) => {
+    try {
+        const userId = req.userId
+        const videos = await Video.find({ likes: userId }).populate("channel")
+
+        return res.status(200).json({
+            message: "Liked videos fetched successfully",
+            videos
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Error occurred while fetching liked videos" })
+    }
+}

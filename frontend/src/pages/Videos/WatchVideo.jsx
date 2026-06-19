@@ -83,6 +83,19 @@ const WatchVideo = () => {
     incrementView();
   }, [videoId]);
 
+  // Automatically add to watch history when video is opened
+  useEffect(() => {
+    if (!userData) return;
+    const addToHistory = async () => {
+      try {
+        await axios.post(`${serverUrl}/api/user/watch-history/${videoId}`, {}, { withCredentials: true });
+      } catch (error) {
+        console.error('Failed to add to watch history:', error);
+      }
+    };
+    addToHistory();
+  }, [videoId, userData]);
+
   // Fetch comments
   useEffect(() => {
     const fetchComments = async () => {

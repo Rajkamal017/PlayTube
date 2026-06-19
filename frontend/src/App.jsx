@@ -23,6 +23,8 @@ import GetAllContentData from "./customHooks/GetAllContentData";
 import WatchVideo from "./pages/Videos/WatchVideo";
 import SearchResults from "./pages/Videos/SearchResults";
 import ChannelPage from "./pages/Channel/ChannelPage";
+import WatchHistory from "./pages/Videos/WatchHistory";
+import LikedVideos from "./pages/Videos/LikedVideos";
 
 const ProtectRoute = ({ userData, children }) => {
   if (!userData) {
@@ -46,6 +48,22 @@ const App = () => {
           <Route path="/watch/:videoId" element={<WatchVideo />} />
           <Route path="/search" element={<SearchResults />} />
           <Route path="/channel/:channelId" element={<ChannelPage />} />
+          <Route
+            path="/history"
+            element={
+              <ProtectRoute userData={userData}>
+                <WatchHistory />
+              </ProtectRoute>
+            }
+          />
+          <Route
+            path="/liked"
+            element={
+              <ProtectRoute userData={userData}>
+                <LikedVideos />
+              </ProtectRoute>
+            }
+          />
           <Route
             path="/shorts"
             element={
