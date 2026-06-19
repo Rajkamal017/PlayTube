@@ -1,30 +1,55 @@
-# 🎬 PlayTube
+<p align="center">
+  <img src="./frontend/public/playtube.webp" alt="PlayTube Logo" width="120" />
+</p>
 
-A full-stack video sharing platform with crypto integration built with the MERN stack — inspired by Odysee & Youtube. Users can create channels, upload videos, post shorts, manage playlists, and interact with content and earn crypto by watching videos.
+<h1 align="center">🎬 PlayTube</h1>
+
+<p align="center">
+  A full-stack AI generated video sharing platform with Web3 crypto rewards.
+  <br/>
+  Built with the MERN stack.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/React-19-blue?logo=react" />
+  <img src="https://img.shields.io/badge/Node.js-Express-green?logo=node.js" />
+  <img src="https://img.shields.io/badge/MongoDB-Mongoose-brightgreen?logo=mongodb" />
+  <img src="https://img.shields.io/badge/TailwindCSS-v4-06B6D4?logo=tailwindcss" />
+  <img src="https://img.shields.io/badge/License-MIT-yellow" />
+</p>
+
+---
+
+## 📌 Overview
+
+PlayTube is a feature-rich video sharing platform where users can create channels, upload videos & shorts, earn crypto rewards for watching, tip creators, manage playlists, and interact with a community — all in one place.
 
 ---
 
 ## 🚀 Tech Stack
 
 ### Frontend
-- **React 19** — UI library
-- **Vite** — Build tool
-- **Tailwind CSS v4** — Styling
-- **Redux Toolkit** — State management
-- **React Router DOM v7** — Client-side routing
-- **Axios** — HTTP requests
-- **Firebase** — Google Authentication
-- **React Icons** — Icon library
+| Technology | Purpose |
+|---|---|
+| **React 19** | UI library |
+| **Vite** | Build tool |
+| **Tailwind CSS v4** | Styling |
+| **Redux Toolkit** | State management |
+| **React Router DOM v7** | Client-side routing |
+| **Axios** | HTTP requests |
+| **Firebase** | Google Authentication |
+| **React Icons** | Icon library |
 
 ### Backend
-- **Node.js** — Runtime environment
-- **Express.js** — Web framework
-- **MongoDB + Mongoose** — Database
-- **JWT + Cookies** — Authentication
-- **Bcryptjs** — Password hashing
-- **Multer** — File uploads
-- **Cloudinary** — Media storage (videos, images)
-- **Nodemailer** — OTP email service
+| Technology | Purpose |
+|---|---|
+| **Node.js + Express.js** | Server & API |
+| **MongoDB + Mongoose** | Database |
+| **JWT + Cookies** | Authentication |
+| **Bcryptjs** | Password hashing |
+| **Multer** | File upload handling |
+| **Cloudinary** | Media storage (videos, images) |
+| **Nodemailer** | OTP email service |
 
 ---
 
@@ -32,36 +57,37 @@ A full-stack video sharing platform with crypto integration built with the MERN 
 
 ### 🔐 Authentication
 - Sign Up / Sign In / Sign Out
-- Google OAuth integrations (via Firebase)
-- Forgot Password with verification OTP codes
+- Google OAuth integration via Firebase
+- Forgot Password with OTP email verification
 
 ### 📺 Channel System
 - Create & update channels (avatar, banner, name, description, category)
-- View public channel profiles with tabs for Videos, Playlists, Posts, and About details
-- Channel customization and dynamic Subscriber count increments
+- View public channel profiles with tabs — Videos, Playlists, Posts & About
+- Dynamic subscriber count display
 
 ### 🎥 Video Hub
-- Upload high-definition videos with titles, descriptions, custom thumbnails, and search tags
-- Home feed video grid listing counts, dates, and channel links
-- Cinematic **Ambient Glow Mode** around the watch page video player that dynamically reflects and pulses with video category gradients
+- Upload HD videos with title, description, custom thumbnail & tags
+- Home feed with video grid showing views, dates & channel links
+- **Ambient Glow Mode** — cinematic glow around the video player that pulses with category gradients
 
 ### 🪙 Web3 Rewards & Wallet
-- Odysee-style watch reward program: earn **1.0 PTC** (PlayTube Coin) per unique video watched, capped at `5.0 PTC` daily
-- Dedicated crypto **Wallet dashboard** `/wallet` listing balance, daily claim stats, USD valuation estimate, and transactional ledger logs
-- **Creator Tipping**: Send custom/preset tipping coins directly from the watch actions bar to support your favorite creators
+- Earn **1.0 PTC** (PlayTube Coin) per unique video watched, capped at **5.0 PTC/day**
+- Wallet dashboard `/wallet` — balance, daily stats, USD estimate & transaction ledger
+- **Creator Tipping** — send custom/preset PTC tips directly from the watch page to support creators
 
 ### 📂 Playlists & Bookmarks
-- **Bookmarks**: Quick one-click bookmarks to save videos to library, listable under `/saved`
-- **Playlists**: Create custom playlists, edit titles/descriptions, and toggle video associations using a checklists drawer popup inside the video watch player
-- Dynamic playlist view `/playlist/:playlistId` with removal triggers
+- **Bookmarks** — one-click save videos to library, viewable at `/saved`
+- **Playlists** — create, edit, and manage playlists with a checklist drawer popup in the video player
+- Playlist view page `/playlist/:playlistId` with video removal support
 
 ### 💬 Social Interactions
-- Live comments feed: post comments, delete comments, and view relative dates and author profiles
-- Video Like/Dislike ratings
-- Community Posts: Share text updates and images under the channel tab, complete with toggle-likes and owner removals
+- Live comments — post, delete & view relative timestamps with author profiles
+- Video Like / Dislike ratings
+- **Community Posts** — share text & images under channel tab with toggle-likes and owner removal
 
-### ⚡ Immersive Shorts Feed
-- Vertical shorts player (TikTok/YouTube Shorts format) supporting swiping controls, views count updates, links copying, and interaction indicators
+### ⚡ Shorts Feed
+- Vertical shorts player (TikTok / YouTube Shorts style)
+- Swipe controls, view count updates, link copying & interaction indicators
 
 ---
 
@@ -71,18 +97,18 @@ A full-stack video sharing platform with crypto integration built with the MERN 
 PlayTube/
 ├── backend/
 │   ├── config/
-│   │   ├── cloudinary.js
-│   │   ├── db.js
-│   │   ├── sendMail.js
-│   │   └── token.js
+│   │   ├── cloudinary.js       # Cloudinary setup
+│   │   ├── db.js               # MongoDB connection
+│   │   ├── sendMail.js         # Nodemailer OTP
+│   │   └── token.js            # JWT token generator
 │   ├── controllers/
 │   │   ├── auth.controller.js
 │   │   ├── user.controller.js
 │   │   ├── video.controller.js
 │   │   └── short.controller.js
 │   ├── middlewares/
-│   │   ├── isAuth.js
-│   │   └── multer.js
+│   │   ├── isAuth.js           # JWT auth middleware
+│   │   └── multer.js           # File upload middleware
 │   ├── models/
 │   │   ├── userModel.js
 │   │   ├── channelModel.js
@@ -98,17 +124,18 @@ PlayTube/
 │
 └── frontend/
     ├── src/
-    │   ├── components/
+    │   ├── components/         # Reusable components
     │   ├── pages/
-    │   │   ├── Channel/
-    │   │   ├── Videos/
-    │   │   ├── Shorts/
-    │   │   ├── Playlist/
-    │   │   └── Post/
-    │   ├── Redux/
-    │   ├── customHooks/
+    │   │   ├── Channel/        # Create, Update, View Channel
+    │   │   ├── Videos/         # Create & Watch Video
+    │   │   ├── Shorts/         # Create & View Shorts
+    │   │   ├── Playlist/       # Create & View Playlist
+    │   │   └── Post/           # Community Posts
+    │   ├── Redux/              # Store, userSlice, contentSlice
+    │   ├── customHooks/        # GetCurrentUser, GetChannelData, etc.
     │   └── App.jsx
     └── utils/
+        └── firebase.js
 ```
 
 ---
@@ -187,47 +214,47 @@ npm run dev
 ### User Routes — `/api/user`
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/getuser` | Get logged-in user profile, wallet balance, and history |
+| GET | `/getuser` | Get logged-in user profile, wallet & history |
 | POST | `/createchannel` | Create channel (avatar, banner, name, category) |
-| POST | `/updatechannel` | Update channel details and customizable assets |
+| POST | `/updatechannel` | Update channel details |
 | GET | `/getchannel` | Get owner's channel details |
-| POST | `/channel/:channelId/subscribe` | Subscribe or unsubscribe to a channel |
-| GET | `/channel/:channelId` | Get public channel details (populates videos and playlists) |
+| POST | `/channel/:channelId/subscribe` | Subscribe / Unsubscribe a channel |
+| GET | `/channel/:channelId` | Get public channel details |
 | POST | `/watch-history/:videoId` | Add video to watch history |
-| GET | `/watch-history` | Get watch history (reverse chronological) |
-| GET | `/subscriptions/videos` | Get videos uploaded by subscribed channels |
-| POST | `/save-video/:videoId` | Toggle video bookmark (save/unsave) |
-| GET | `/saved-videos` | Get bookmarked videos |
-| POST | `/earn-reward/:videoId` | Earn 1.0 PTC token rewards for watching a video |
-| POST | `/tip-creator` | Transfer PTC tokens as a tip to a channel owner |
+| GET | `/watch-history` | Get watch history |
+| GET | `/subscriptions/videos` | Get videos from subscribed channels |
+| POST | `/save-video/:videoId` | Toggle bookmark (save/unsave) |
+| GET | `/saved-videos` | Get all bookmarked videos |
+| POST | `/earn-reward/:videoId` | Earn 1.0 PTC for watching a video |
+| POST | `/tip-creator` | Send PTC tip to a creator |
 
 ### Content Routes — `/api/content`
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/create-video` | Upload a video (video file, thumbnail, tags, category) |
-| GET | `/get-all-videos` | Get all uploaded videos |
-| GET | `/video/:videoId` | Retrieve single video details (populates channel) |
-| DELETE | `/video/:videoId` | Delete video (purges DB entry & Cloudinary files) |
-| PUT | `/video/:videoId` | Update video details and thumbnail file |
-| GET | `/search` | Case-insensitive video search by title/tags |
-| POST | `/video/:videoId/view` | Increment video view count |
+| POST | `/create-video` | Upload a video |
+| GET | `/get-all-videos` | Get all videos |
+| GET | `/video/:videoId` | Get single video details |
+| DELETE | `/video/:videoId` | Delete video (DB + Cloudinary) |
+| PUT | `/video/:videoId` | Update video details |
+| GET | `/search` | Search videos by title/tags |
+| POST | `/video/:videoId/view` | Increment view count |
 | GET | `/liked-videos` | Get liked videos |
 | POST | `/video/:videoId/comment` | Add comment |
-| GET | `/video/:videoId/comments` | Get video comments feed |
-| DELETE | `/video/:videoId/comment/:commentId` | Delete comment (commenter only) |
-| POST | `/video/:videoId/like` | Toggle video like state |
-| POST | `/create-short` | Upload a Short video |
-| GET | `/shorts` | Get all uploaded Shorts |
+| GET | `/video/:videoId/comments` | Get video comments |
+| DELETE | `/video/:videoId/comment/:commentId` | Delete comment |
+| POST | `/video/:videoId/like` | Toggle video like |
+| POST | `/create-short` | Upload a Short |
+| GET | `/shorts` | Get all Shorts |
 | GET | `/short/:shortId` | Get Short by ID |
-| POST | `/short/:shortId/like` | Toggle Short like state |
-| POST | `/short/:shortId/view` | Increment Short view count |
+| POST | `/short/:shortId/like` | Toggle Short like |
+| POST | `/short/:shortId/view` | Increment Short views |
 
 ### Playlist Routes — `/api/playlist`
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/create` | Create a new playlist |
-| GET | `/user/playlists` | Fetch all playlists created under the user's channel |
-| GET | `/:playlistId` | Get playlist details and populated video details |
+| GET | `/user/playlists` | Get all user's playlists |
+| GET | `/:playlistId` | Get playlist with videos |
 | DELETE | `/:playlistId` | Delete playlist |
 | POST | `/:playlistId/video/:videoId` | Add video to playlist |
 | DELETE | `/:playlistId/video/:videoId` | Remove video from playlist |
@@ -235,10 +262,10 @@ npm run dev
 ### Community Post Routes — `/api/post`
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/create` | Create a text update / image post |
-| GET | `/channel/:channelId` | Get all community posts of a channel |
+| POST | `/create` | Create text/image post |
+| GET | `/channel/:channelId` | Get all posts of a channel |
 | DELETE | `/:postId` | Delete post |
-| POST | `/:postId/like` | Toggle post like state |
+| POST | `/:postId/like` | Toggle post like |
 
 ---
 
@@ -249,13 +276,19 @@ npm run dev
 | Frontend | [Vercel](https://vercel.com) |
 | Backend | [Render](https://render.com) |
 | Database | [MongoDB Atlas](https://www.mongodb.com/atlas) |
-| Media | [Cloudinary](https://cloudinary.com) |
+| Media Storage | [Cloudinary](https://cloudinary.com) |
 
 ---
 
 ## 🤝 Contributing
 
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+Pull requests are welcome! For major changes, please open an issue first to discuss what you'd like to change.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
 
@@ -268,3 +301,7 @@ This project is open source and available under the [MIT License](LICENSE).
 ## 👨‍💻 Author
 
 **Rajkamal** — [@Rajkamal017](https://github.com/Rajkamal017)
+
+---
+
+<p align="center">⭐ Star this repo if you found it helpful!</p>

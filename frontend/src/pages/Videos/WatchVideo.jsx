@@ -417,7 +417,7 @@ const WatchVideo = () => {
 
   return (
     <div className="w-full min-h-screen bg-[#0f0f0f] text-white pt-16 pb-12 px-2 sm:px-4 lg:px-6">
-      <div className="max-w-[1500px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="max-w-375 mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Left Side: Video Player & Details (8 columns) */}
         <div className="lg:col-span-8 space-y-4">
@@ -425,7 +425,7 @@ const WatchVideo = () => {
           {/* Video Player Wrapper with Ambient Glow */}
           <div className="relative w-full aspect-video rounded-2xl">
             {/* Ambient Glow Backdrop */}
-            <div className={`absolute inset-0 -z-10 rounded-2xl bg-gradient-to-tr ${getAmbientGradient(video.channel?.category)} blur-[100px] opacity-45 animate-ambient-glow pointer-events-none`} />
+            <div className={`absolute inset-0 -z-10 rounded-2xl bg-linear-to-tr ${getAmbientGradient(video.channel?.category)} blur-[100px] opacity-45 animate-ambient-glow pointer-events-none`} />
             
             {/* Video Player */}
             <div className="w-full h-full rounded-2xl overflow-hidden bg-black border border-gray-800 shadow-2xl relative">
@@ -657,14 +657,14 @@ const WatchVideo = () => {
                     {/* Comment Body */}
                     <div className="flex-1 space-y-1 overflow-hidden">
                       <div className="flex items-center gap-2 text-xs">
-                        <span className="font-bold text-white truncate max-w-[150px]">
+                        <span className="font-bold text-white truncate max-w-37.5">
                           {comment.author?.userName || 'Anonymous'}
                         </span>
                         <span className="text-gray-500">
                           {new Date(comment.createdAt).toLocaleDateString()}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-300 leading-relaxed break-words">
+                      <p className="text-sm text-gray-300 leading-relaxed wrap-break">
                         {comment.message}
                       </p>
                     </div>
@@ -704,7 +704,7 @@ const WatchVideo = () => {
                   className="flex gap-3 group bg-transparent hover:bg-[#1a1a1a] rounded-xl p-1.5 transition duration-200"
                 >
                   {/* Thumbnail */}
-                  <div className="w-40 aspect-video rounded-lg overflow-hidden bg-black flex-shrink-0 relative">
+                  <div className="w-40 aspect-video rounded-lg overflow-hidden bg-black shrink-0 relative">
                     <img
                       src={item.thumbnail}
                       alt={item.title}
@@ -751,7 +751,7 @@ const WatchVideo = () => {
               </button>
             </div>
 
-            <div className="p-6 space-y-4 max-h-[300px] overflow-y-auto">
+            <div className="p-6 space-y-4 max-h-75 overflow-y-auto">
               {playlistsLoading ? (
                 <div className="flex justify-center py-6">
                   <ClipLoader color="#a855f7" size={24} />
