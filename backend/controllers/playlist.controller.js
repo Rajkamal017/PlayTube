@@ -163,3 +163,27 @@ export const removeFromPlaylist = async (req, res) => {
         return res.status(500).json({ message: "Error occurred while removing video from playlist" });
     }
 };
+
+export const getUserPlaylists = async (req, res) => {
+    try {
+        const userId = req.userId;
+        const channel = await Channel.findOne({ owner: userId });
+        if (!channel) {
+            return res.status(200).json({
+                message: "No channel found for this user",
+                playlists: []
+            });
+        }
+
+        const playlists = await Playlist.find({ channel: channel._id });
+
+        return res.status(200).json({
+            message: "User playlists fetched successfully",
+            playlists
+        });
+    } catch (error) {
+        console.error("Error fetching user playlists:", error);
+        return res.status(500).json({ message: "Error occurred while fetching user playlists" });
+    }
+};
+

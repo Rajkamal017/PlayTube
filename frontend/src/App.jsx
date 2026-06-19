@@ -27,6 +27,8 @@ import WatchHistory from "./pages/Videos/WatchHistory";
 import LikedVideos from "./pages/Videos/LikedVideos";
 import Subscriptions from "./pages/Videos/Subscriptions";
 import PlaylistDetails from "./pages/Playlist/PlaylistDetails";
+import SavedVideos from "./pages/Videos/SavedVideos";
+
 
 const ProtectRoute = ({ userData, children }) => {
   if (!userData) {
@@ -50,6 +52,7 @@ const App = () => {
           <Route path="/watch/:videoId" element={<WatchVideo />} />
           <Route path="/search" element={<SearchResults />} />
           <Route path="/channel/:channelId" element={<ChannelPage />} />
+          <Route path="/playlist/:playlistId" element={<PlaylistDetails />} />
           <Route
             path="/history"
             element={
@@ -63,6 +66,14 @@ const App = () => {
             element={
               <ProtectRoute userData={userData}>
                 <LikedVideos />
+              </ProtectRoute>
+            }
+          />
+          <Route
+            path="/saved"
+            element={
+              <ProtectRoute userData={userData}>
+                <SavedVideos />
               </ProtectRoute>
             }
           />

@@ -252,19 +252,14 @@ const WatchVideo = () => {
       showCustomAlert("Please sign in to save videos to playlists.");
       return;
     }
-    
-    let userChannelId = userData.channel || (channelData && channelData._id);
-    if (!userChannelId) {
-      showCustomAlert("Please create a channel first before saving to a playlist.");
-      navigate("/createchannel");
-      return;
-    }
 
     setIsPlaylistModalOpen(true);
     setPlaylistsLoading(true);
     try {
-      const response = await axios.get(`${serverUrl}/api/user/channel/${userChannelId}`);
-      setUserPlaylists(response.data.channel?.playlists || []);
+      const response = await axios.get(`${serverUrl}/api/playlist/user/playlists`, {
+        withCredentials: true,
+      });
+      setUserPlaylists(response.data.playlists || []);
     } catch (error) {
       console.error("Error fetching playlists for modal:", error);
     } finally {
@@ -287,9 +282,10 @@ const WatchVideo = () => {
         showCustomAlert(`Saved to playlist "${playlist.title}"`);
       }
 
-      let userChannelId = userData.channel || (channelData && channelData._id);
-      const response = await axios.get(`${serverUrl}/api/user/channel/${userChannelId}`);
-      setUserPlaylists(response.data.channel?.playlists || []);
+      const response = await axios.get(`${serverUrl}/api/playlist/user/playlists`, {
+        withCredentials: true,
+      });
+      setUserPlaylists(response.data.playlists || []);
     } catch (error) {
       console.error("Error toggling video in playlist:", error);
       showCustomAlert("Failed to update playlist.");

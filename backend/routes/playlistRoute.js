@@ -4,7 +4,8 @@ import {
     getPlaylist,
     deletePlaylist,
     addVideoToPlaylist,
-    removeFromPlaylist
+    removeFromPlaylist,
+    getUserPlaylists
 } from "../controllers/playlist.controller.js";
 import isAuth from "../middlewares/isAuth.js";
 
@@ -12,6 +13,7 @@ const playlistRouter = express.Router();
 
 // Playlist CRUD
 playlistRouter.post("/create", isAuth, createPlaylist);
+playlistRouter.get("/user/playlists", isAuth, getUserPlaylists);
 playlistRouter.get("/:playlistId", getPlaylist);
 playlistRouter.delete("/:playlistId", isAuth, deletePlaylist);
 

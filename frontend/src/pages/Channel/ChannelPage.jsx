@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { ClipLoader } from "react-spinners";
-import { FaRegFolderOpen, FaVideo, FaInfoCircle, FaEdit, FaTrash, FaList } from "react-icons/fa";
+import { FaRegFolderOpen, FaVideo, FaInfoCircle, FaEdit, FaTrash, FaList, FaThumbsUp, FaRegThumbsUp } from "react-icons/fa";
 import { serverUrl } from "../../config";
 import { showCustomAlert } from "../../components/CustomeAlert";
 
@@ -136,6 +136,69 @@ const ChannelPage = () => {
       setDeletingPlaylist(false);
     }
   };
+
+  const [posts, setPosts] = useState([]);
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [isDeletePostModalOpen, setIsDeletePostModalOpen] = useState(false);
+  const [deletingPost, setDeletingPost] = useState(false);
+
+  const fetchChannelPosts = async () => {
+    setPostsLoading(true);
+    try {
+      const response = await axios.get(`${serverUrl}/api/post/channel/${channelId}`);
+      setPosts(response.data.posts || []);
+    } catch (error) {
+      console.error("Error fetching channel posts:", error);
+    } finally {
+      setPostsLoading(false);
+    }
+  };
+
+  const handleLikePost = async (post) => {
+    if (!userData) {
+      showCustomAlert("Please sign in to like posts.");
+      return;
+    }
+    try {
+      await axios.post(`${serverUrl}/api/post/${post._id}/like`, {}, {
+        withCredentials: true,
+      });
+      fetchChannelPosts();
+    } catch (error) {
+      console.error("Error toggling like on post:", error);
+    }
+  };
+
+  const openDeletePostConfirm = (post) => {
+    setSelectedPost(post);
+    setIsDeletePostModalOpen(true);
+  };
+
+  const handleDeletePostSubmit = async () => {
+    setDeletingPost(true);
+    try {
+      await axios.delete(`${serverUrl}/api/post/${selectedPost._id}`, {
+        withCredentials: true,
+      });
+
+      showCustomAlert("Post deleted successfully!");
+      setIsDeletePostModalOpen(false);
+      fetchChannelPosts();
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      const errorMsg = error.response?.data?.message || "Failed to delete post.";
+      showCustomAlert(errorMsg);
+    } finally {
+      setDeletingPost(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "Posts") {
+      fetchChannelPosts();
+    }
+  }, [activeTab, channelId]);
 
   useEffect(() => {
     const fetchChannelDetails = async () => {
@@ -292,7 +355,7 @@ const ChannelPage = () => {
         {/* Navigation Tabs */}
         <div className="border-b border-gray-800/80 pt-6">
           <div className="flex gap-8 px-2">
-            {["Videos", "Playlists", "About"].map((tab) => (
+            {["Videos", "Playlists", "Posts", "About"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -453,6 +516,107 @@ const ChannelPage = () => {
                     {isOwner && (
                       <p className="text-sm text-gray-500">
                         Click "+ Create" to make your first playlist.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "Posts" && (
+            <div className="max-w-2xl mx-auto space-y-6">
+              {postsLoading ? (
+                <div className="flex justify-center py-10">
+                  <ClipLoader color="#a855f7" size={30} />
+                </div>
+              ) : posts.length > 0 ? (
+                <div className="space-y-6">
+                  {posts.map((post) => {
+                    const isLiked = userData && post.likes?.includes(userData._id);
+                    return (
+                      <div
+                        key={post._id}
+                        className="bg-[#141414] border border-gray-800/60 rounded-2xl p-5 space-y-4 shadow-sm"
+                      >
+                        {/* Header */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={channel.avatar || "https://via.placeholder.com/40"}
+                              alt={channel.name}
+                              className="w-10 h-10 rounded-full object-cover border border-gray-800"
+                            />
+                            <div className="flex flex-col">
+                              <span className="text-sm font-bold text-white">
+                                {channel.name}
+                              </span>
+                              <span className="text-[11px] text-gray-500">
+                                {new Date(post.createdAt).toLocaleDateString(undefined, {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric'
+                                })}
+                              </span>
+                            </div>
+                          </div>
+
+                          {isOwner && (
+                            <button
+                              onClick={() => openDeletePostConfirm(post)}
+                              className="text-gray-400 hover:text-red-500 p-2 rounded-full hover:bg-red-950/20 transition cursor-pointer"
+                              title="Delete Post"
+                            >
+                              <FaTrash size={13} />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Content text */}
+                        <p className="text-sm text-gray-200 leading-relaxed whitespace-pre-wrap">
+                          {post.content}
+                        </p>
+
+                        {/* Attached Image */}
+                        {post.image && (
+                          <div className="rounded-xl overflow-hidden border border-gray-800 max-h-[400px] bg-black flex items-center justify-center">
+                            <img
+                              src={post.image}
+                              alt="Attached update"
+                              className="max-h-[400px] object-contain w-full"
+                            />
+                          </div>
+                        )}
+
+                        {/* Footer action buttons */}
+                        <div className="flex items-center gap-4 pt-2 border-t border-gray-800/40 text-xs">
+                          <button
+                            onClick={() => handleLikePost(post)}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition cursor-pointer ${
+                              isLiked
+                                ? "bg-purple-950/30 text-purple-400 border border-purple-900/30"
+                                : "bg-[#222] hover:bg-[#333] text-gray-400 hover:text-white border border-transparent"
+                            }`}
+                          >
+                            {isLiked ? <FaThumbsUp size={12} /> : <FaRegThumbsUp size={12} />}
+                            <span className="font-bold">{post.likes?.length || 0}</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                /* Empty Posts State */
+                <div className="flex flex-col items-center justify-center text-center py-20 space-y-4">
+                  <div className="bg-[#181818] text-gray-600 p-5 rounded-full border border-gray-800">
+                    <FaPen size={36} />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-bold text-gray-300">No community posts yet</h3>
+                    {isOwner && (
+                      <p className="text-sm text-gray-500">
+                        Click "+ Create" to make your first community post.
                       </p>
                     )}
                   </div>
@@ -663,6 +827,44 @@ const ChannelPage = () => {
                   >
                     {deletingPlaylist ? <ClipLoader color="#ffffff" size={12} /> : null}
                     {deletingPlaylist ? "Deleting..." : "Delete"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Delete Post Confirmation Modal */}
+        {isDeletePostModalOpen && (
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-[#121212] border border-gray-800 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
+              <div className="p-6 space-y-6 text-center">
+                <div className="bg-red-950/20 text-red-500 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto border border-red-900/30">
+                  <FaTrash size={24} />
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-lg font-bold text-white">Delete Post?</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed">
+                    Are you sure you want to delete this community post? This action cannot be undone and will permanently delete the post.
+                  </p>
+                </div>
+
+                <div className="flex justify-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsDeletePostModalOpen(false)}
+                    className="bg-[#272727] hover:bg-[#383838] border border-gray-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition w-1/2 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeletePostSubmit}
+                    disabled={deletingPost}
+                    className="bg-red-600 hover:bg-red-700 disabled:bg-red-800 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition w-1/2 flex items-center justify-center gap-2 shadow-md cursor-pointer"
+                  >
+                    {deletingPost ? <ClipLoader color="#ffffff" size={12} /> : null}
+                    {deletingPost ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>
