@@ -14,7 +14,7 @@ import { ClipLoader } from "react-spinners";
 import { serverUrl } from "../../config";
 import { showCustomAlert } from "../../components/CustomeAlert";
 import { useDispatch } from "react-redux";
-import { setAllVideosData } from "../../Redux/contentSlice";
+import { setAllVideosData } from "../../redux/contentSlice";
 
 const CreateVideo = () => {
   const { channelData, userData } = useSelector((state) => state.user);

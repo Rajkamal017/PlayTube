@@ -6,7 +6,7 @@ import { FaThumbsUp, FaThumbsDown, FaShare, FaBookmark, FaRegThumbsUp, FaRegThum
 import { ClipLoader } from 'react-spinners';
 import { serverUrl } from '../../config';
 import { showCustomAlert } from '../../components/CustomeAlert';
-import { setAllVideosData } from '../../Redux/contentSlice';
+import { setAllVideosData } from '../../redux/contentSlice';
 
 const getAmbientGradient = (category) => {
   switch (category?.toLowerCase()) {

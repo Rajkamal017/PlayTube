@@ -8,7 +8,7 @@ import axios from "axios";
 import { serverUrl } from "../../config.js";
 import { showCustomAlert } from "../../components/CustomeAlert";
 import { ClipLoader } from "react-spinners";
-import { setChannelData } from "../../Redux/userSlice.js";
+import { setChannelData } from "../../redux/userSlice.js";
 
 const UpdateChannel = () => {
   const { channelData } = useSelector((state) => state.user);

@@ -8,7 +8,7 @@ import axios from "axios";
 import { serverUrl } from "../config";
 import ClipLoader from "react-spinners/ClipLoader";
 import { useDispatch } from "react-redux";
-import { setUserData } from "../Redux/userSlice";
+import { setUserData } from "../redux/userSlice";
 
 const SignIn = () => {
   const [step, setStep] = useState(1);

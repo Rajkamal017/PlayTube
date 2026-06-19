@@ -8,7 +8,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { serverUrl } from "../config.js";
 import { showCustomAlert } from "../components/CustomeAlert.jsx";
 import { useDispatch } from "react-redux";
-import { setUserData } from "../Redux/userSlice.js";
+import { setUserData } from "../redux/userSlice.js";
 
 const SignUp = () => {
   const [step, setStep] = useState(1);
