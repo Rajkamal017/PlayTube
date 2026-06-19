@@ -263,3 +263,57 @@ export const getSubscribedChannelsVideos = async (req, res) => {
         return res.status(500).json({ message: `Failed to fetch subscribed channel videos: ${error}` })
     }
 }
+
+export const toggleSaveVideo = async (req, res) => {
+    try {
+        const { videoId } = req.params
+        const userId = req.userId
+
+        const user = await User.findById(userId)
+        if (!user) {
+            return res.status(404).json({ message: "User not found" })
+        }
+
+        const isSaved = user.savedVideos.includes(videoId)
+        if (isSaved) {
+            user.savedVideos.pull(videoId)
+        } else {
+            user.savedVideos.push(videoId)
+        }
+
+        await user.save()
+
+        return res.status(200).json({
+            message: isSaved ? "Video unsaved successfully" : "Video saved successfully",
+            isSaved: !isSaved,
+            savedVideos: user.savedVideos
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: `Failed to toggle save video: ${error}` })
+    }
+}
+
+export const getSavedVideos = async (req, res) => {
+    try {
+        const userId = req.userId
+        const user = await User.findById(userId).populate({
+            path: "savedVideos",
+            populate: {
+                path: "channel"
+            }
+        })
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" })
+        }
+
+        return res.status(200).json({
+            message: "Saved videos fetched successfully",
+            videos: user.savedVideos
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: `Failed to fetch saved videos: ${error}` })
+    }
+}

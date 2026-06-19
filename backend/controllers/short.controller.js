@@ -73,3 +73,79 @@ export const getAllShorts = async (req, res) => {
         return res.status(500).json({ message: "Error occur while fetching shorts" })
     }
 }
+
+export const getShortById = async (req, res) => {
+    try {
+        const { shortId } = req.params;
+        const short = await Short.findById(shortId).populate("channel");
+
+        if (!short) {
+            return res.status(404).json({ message: "Short video not found" });
+        }
+
+        return res.status(200).json({
+            message: "Short video fetched successfully",
+            short
+        });
+    } catch (error) {
+        console.error("Error fetching short details:", error);
+        return res.status(500).json({ message: "Error occurred while fetching short video details" });
+    }
+};
+
+export const toggleLikeShort = async (req, res) => {
+    try {
+        const { shortId } = req.params;
+        const userId = req.userId;
+
+        const short = await Short.findById(shortId);
+        if (!short) {
+            return res.status(404).json({ message: "Short video not found" });
+        }
+
+        const isLiked = short.likes.includes(userId);
+        if (isLiked) {
+            short.likes.pull(userId);
+        } else {
+            short.likes.push(userId);
+            if (short.disLikes && short.disLikes.includes(userId)) {
+                short.disLikes.pull(userId);
+            }
+        }
+
+        await short.save();
+        
+        return res.status(200).json({
+            message: isLiked ? "Short unliked successfully" : "Short liked successfully",
+            likesCount: short.likes.length,
+            isLiked: !isLiked,
+            likes: short.likes
+        });
+    } catch (error) {
+        console.error("Error toggling like on short:", error);
+        return res.status(500).json({ message: "Error occurred while toggling like on short" });
+    }
+};
+
+export const incrementShortViewCount = async (req, res) => {
+    try {
+        const { shortId } = req.params;
+        const short = await Short.findByIdAndUpdate(
+            shortId,
+            { $inc: { views: 1 } },
+            { new: true }
+        );
+
+        if (!short) {
+            return res.status(404).json({ message: "Short video not found" });
+        }
+
+        return res.status(200).json({
+            message: "Short view count incremented successfully",
+            views: short.views
+        });
+    } catch (error) {
+        console.error("Error incrementing short view:", error);
+        return res.status(500).json({ message: "Error occurred while incrementing short view count" });
+    }
+};

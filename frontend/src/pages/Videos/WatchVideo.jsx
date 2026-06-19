@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
-import { FaThumbsUp, FaThumbsDown, FaShare, FaBookmark, FaRegThumbsUp, FaRegThumbsDown, FaTrash, FaUserCircle } from 'react-icons/fa';
+import { FaThumbsUp, FaThumbsDown, FaShare, FaBookmark, FaRegThumbsUp, FaRegThumbsDown, FaTrash, FaUserCircle, FaList } from 'react-icons/fa';
 import { ClipLoader } from 'react-spinners';
 import { serverUrl } from '../../config';
 import { showCustomAlert } from '../../components/CustomeAlert';
@@ -14,7 +14,7 @@ const WatchVideo = () => {
   const dispatch = useDispatch();
 
   const { allVideosData } = useSelector((state) => state.content);
-  const { userData } = useSelector((state) => state.user);
+  const { userData, channelData } = useSelector((state) => state.user);
 
   // States
   const [video, setVideo] = useState(null);
@@ -24,6 +24,15 @@ const WatchVideo = () => {
   const [likeState, setLikeState] = useState(null); // 'like', 'dislike', or null
   const [likesCount, setLikesCount] = useState(0);
   const [isDescExpanded, setIsDescExpanded] = useState(false);
+
+  // Playlist Modal State
+  const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
+  const [userPlaylists, setUserPlaylists] = useState([]);
+  const [playlistsLoading, setPlaylistsLoading] = useState(false);
+
+  // Saved State
+  const [isSaved, setIsSaved] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
 
   // Comments states
   const [comments, setComments] = useState([]);
@@ -94,6 +103,23 @@ const WatchVideo = () => {
       }
     };
     addToHistory();
+  }, [videoId, userData]);
+
+  // Check if video is saved
+  useEffect(() => {
+    if (!userData) return;
+    const checkSavedStatus = async () => {
+      try {
+        const response = await axios.get(`${serverUrl}/api/user/saved-videos`, {
+          withCredentials: true,
+        });
+        const savedList = response.data.videos || [];
+        setIsSaved(savedList.some(v => v._id === videoId));
+      } catch (error) {
+        console.error("Error checking saved status:", error);
+      }
+    };
+    checkSavedStatus();
   }, [videoId, userData]);
 
   // Fetch comments
@@ -221,6 +247,75 @@ const WatchVideo = () => {
     }
   };
 
+  const handleOpenPlaylistModal = async () => {
+    if (!userData) {
+      showCustomAlert("Please sign in to save videos to playlists.");
+      return;
+    }
+    
+    let userChannelId = userData.channel || (channelData && channelData._id);
+    if (!userChannelId) {
+      showCustomAlert("Please create a channel first before saving to a playlist.");
+      navigate("/createchannel");
+      return;
+    }
+
+    setIsPlaylistModalOpen(true);
+    setPlaylistsLoading(true);
+    try {
+      const response = await axios.get(`${serverUrl}/api/user/channel/${userChannelId}`);
+      setUserPlaylists(response.data.channel?.playlists || []);
+    } catch (error) {
+      console.error("Error fetching playlists for modal:", error);
+    } finally {
+      setPlaylistsLoading(false);
+    }
+  };
+
+  const handleToggleVideoPlaylist = async (playlist) => {
+    const isVideoInPlaylist = playlist.videos?.includes(videoId);
+    try {
+      if (isVideoInPlaylist) {
+        await axios.delete(`${serverUrl}/api/playlist/${playlist._id}/video/${videoId}`, {
+          withCredentials: true,
+        });
+        showCustomAlert(`Removed from playlist "${playlist.title}"`);
+      } else {
+        await axios.post(`${serverUrl}/api/playlist/${playlist._id}/video/${videoId}`, {}, {
+          withCredentials: true,
+        });
+        showCustomAlert(`Saved to playlist "${playlist.title}"`);
+      }
+
+      let userChannelId = userData.channel || (channelData && channelData._id);
+      const response = await axios.get(`${serverUrl}/api/user/channel/${userChannelId}`);
+      setUserPlaylists(response.data.channel?.playlists || []);
+    } catch (error) {
+      console.error("Error toggling video in playlist:", error);
+      showCustomAlert("Failed to update playlist.");
+    }
+  };
+
+  const handleSaveToggle = async () => {
+    if (!userData) {
+      showCustomAlert("Please sign in to save videos.");
+      return;
+    }
+    setSaveLoading(true);
+    try {
+      const response = await axios.post(`${serverUrl}/api/user/save-video/${videoId}`, {}, {
+        withCredentials: true,
+      });
+      setIsSaved(response.data.isSaved);
+      showCustomAlert(response.data.isSaved ? "Video saved to bookmarks!" : "Video removed from bookmarks!");
+    } catch (error) {
+      console.error("Error toggling save status:", error);
+      showCustomAlert("Failed to save video.");
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
   // Render Loader
   if (loading) {
     return (
@@ -342,11 +437,23 @@ const WatchVideo = () => {
 
               {/* Save */}
               <button
-                onClick={() => showCustomAlert('Video saved to library')}
+                onClick={handleSaveToggle}
+                disabled={saveLoading}
+                className={`flex items-center gap-2 hover:bg-[#3f3f3f] active:scale-95 border border-gray-800 transition py-2 px-4 rounded-full text-sm font-medium cursor-pointer ${
+                  isSaved ? "bg-purple-600 text-white" : "bg-[#272727] text-gray-300"
+                }`}
+              >
+                <FaBookmark className={isSaved ? "text-white" : "text-gray-400"} />
+                <span>{isSaved ? "Saved" : "Save"}</span>
+              </button>
+
+              {/* Playlist */}
+              <button
+                onClick={handleOpenPlaylistModal}
                 className="flex items-center gap-2 bg-[#272727] hover:bg-[#3f3f3f] active:scale-95 border border-gray-800 transition py-2 px-4 rounded-full text-sm font-medium cursor-pointer"
               >
-                <FaBookmark />
-                <span>Save</span>
+                <FaList />
+                <span>Playlist</span>
               </button>
 
             </div>
@@ -540,6 +647,71 @@ const WatchVideo = () => {
         </div>
 
       </div>
+
+      {/* Save to Playlist Modal */}
+      {isPlaylistModalOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#121212] border border-gray-800 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
+            <div className="px-6 py-4 border-b border-gray-800 flex justify-between items-center bg-[#181818]">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Save video to...</h3>
+              <button
+                onClick={() => setIsPlaylistModalOpen(false)}
+                className="text-gray-400 hover:text-white transition cursor-pointer text-xl font-bold font-sans"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 max-h-[300px] overflow-y-auto">
+              {playlistsLoading ? (
+                <div className="flex justify-center py-6">
+                  <ClipLoader color="#a855f7" size={24} />
+                </div>
+              ) : userPlaylists.length > 0 ? (
+                <div className="space-y-3">
+                  {userPlaylists.map((pl) => {
+                    const hasVideo = pl.videos?.includes(videoId);
+                    return (
+                      <label
+                        key={pl._id}
+                        className="flex items-center gap-3 text-sm text-gray-300 hover:text-white cursor-pointer select-none group"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={hasVideo}
+                          onChange={() => handleToggleVideoPlaylist(pl)}
+                          className="w-4 h-4 rounded border-gray-700 bg-[#1a1a1a] text-purple-600 focus:ring-purple-500 focus:ring-offset-[#121212]"
+                        />
+                        <span className="font-medium group-hover:underline">{pl.title}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-6 space-y-3">
+                  <p className="text-sm text-gray-500 font-sans">You don't have any playlists yet.</p>
+                  <Link
+                    to="/createplaylist"
+                    className="inline-block bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-md"
+                  >
+                    + Create Playlist
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-3 border-t border-gray-800 flex justify-end bg-[#181818]">
+              <button
+                onClick={() => setIsPlaylistModalOpen(false)}
+                className="bg-[#272727] hover:bg-[#383838] border border-gray-700 text-white px-4 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

@@ -8,6 +8,7 @@ import cors from "cors"
 import userRouter from "./routes/userRoute.js"
 import contentRouter from "./routes/contentRoute.js"
 import playlistRouter from "./routes/playlistRoute.js"
+import postRouter from "./routes/postRoute.js"
 
 const port = process.env.PORT || 8000
 
@@ -23,6 +24,7 @@ app.use("/api/auth", authRouter)
 app.use("/api/user", userRouter)
 app.use("/api/content", contentRouter)
 app.use("/api/playlist", playlistRouter)
+app.use("/api/post", postRouter)
 
 app.listen(port, () => {
     connectDb()

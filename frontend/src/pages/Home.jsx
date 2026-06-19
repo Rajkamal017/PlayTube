@@ -11,6 +11,7 @@ import {
   FaTimes,
   FaUserCircle,
   FaRegFolderOpen,
+  FaBookmark,
 } from "react-icons/fa";
 import { IoIosAddCircle } from "react-icons/io";
 import { GoVideo } from "react-icons/go";
@@ -191,11 +192,14 @@ function Home() {
             onClick={() => setSelectedItem("Playlists")}
           />
           <SidebarItem
-            icon={<GoVideo />}
+            icon={<FaBookmark />}
             text={"Save Videos"}
             open={sidebarOpen}
             selected={selectedItem === "Save Videos"}
-            onClick={() => setSelectedItem("Save Videos")}
+            onClick={() => {
+              setSelectedItem("Save Videos");
+              navigate("/saved");
+            }}
           />
           <SidebarItem
             icon={<FaThumbsUp />}
