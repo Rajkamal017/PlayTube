@@ -23,6 +23,7 @@
 ## 📌 Overview
 
 PlayTube is a feature-rich video sharing platform where users can create channels, upload videos & shorts, earn crypto rewards for watching, tip creators, manage playlists, and interact with a community — all in one place.
+Link - https://playtube-frontendv1.onrender.com/
 
 ---
 
