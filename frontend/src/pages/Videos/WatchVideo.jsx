@@ -272,10 +272,10 @@ const WatchVideo = () => {
           </h1>
 
           {/* Channel Row & Actions bar */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-2 border-b border-[#2d2d2d] pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-2 border-b border-[#2d2d2d] pb-4 flex-wrap">
             
             {/* Channel info left */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 shrink-0">
               <Link to={`/channel/${video.channel?._id}`} className="cursor-pointer shrink-0">
                 <img
                   src={video.channel?.avatar || 'https://via.placeholder.com/150'}
@@ -310,7 +310,7 @@ const WatchVideo = () => {
             </div>
 
             {/* Actions right */}
-            <div className="flex items-center gap-2 overflow-x-auto">
+            <div className="flex items-center gap-2 shrink-0">
               
               {/* Like / Dislike Container */}
               <div className="flex items-center bg-[#272727] rounded-full p-1 border border-gray-800">

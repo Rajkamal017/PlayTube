@@ -1,4 +1,4 @@
-import uploadOnCloudinary from "../config/cloudinary.js"
+import uploadOnCloudinary, { deleteFromCloudinary } from "../config/cloudinary.js"
 import Channel from "../models/channelModel.js"
 import Video from "../models/videoModel.js"
 
@@ -285,3 +285,94 @@ export const getLikedVideos = async (req, res) => {
         return res.status(500).json({ message: "Error occurred while fetching liked videos" })
     }
 }
+
+export const deleteVideo = async (req, res) => {
+    try {
+        const { videoId } = req.params;
+        const userId = req.userId;
+
+        const video = await Video.findById(videoId);
+        if (!video) {
+            return res.status(404).json({ message: "Video not found" });
+        }
+
+        const channel = await Channel.findById(video.channel);
+        if (!channel) {
+            return res.status(404).json({ message: "Channel not found for this video" });
+        }
+
+        if (channel.owner.toString() !== userId) {
+            return res.status(403).json({ message: "Unauthorized. You do not own this channel" });
+        }
+
+        if (video.videoUrl) {
+            await deleteFromCloudinary(video.videoUrl, "video");
+        }
+        if (video.thumbnail) {
+            await deleteFromCloudinary(video.thumbnail, "image");
+        }
+
+        await Channel.findByIdAndUpdate(video.channel, {
+            $pull: { videos: videoId }
+        });
+
+        await Video.findByIdAndDelete(videoId);
+
+        return res.status(200).json({
+            message: "Video deleted successfully"
+        });
+
+    } catch (error) {
+        console.error("Error deleting video:", error);
+        return res.status(500).json({ message: "Error occurred while deleting video" });
+    }
+};
+
+export const updateVideo = async (req, res) => {
+    try {
+        const { videoId } = req.params;
+        const { title, description } = req.body;
+        const userId = req.userId;
+
+        const video = await Video.findById(videoId);
+        if (!video) {
+            return res.status(404).json({ message: "Video not found" });
+        }
+
+        const channel = await Channel.findById(video.channel);
+        if (!channel) {
+            return res.status(404).json({ message: "Channel not found for this video" });
+        }
+
+        if (channel.owner.toString() !== userId) {
+            return res.status(403).json({ message: "Unauthorized. You do not own this channel" });
+        }
+
+        if (title !== undefined) video.title = title;
+        if (description !== undefined) video.description = description;
+
+        if (req.file) {
+            const newThumbnailUrl = await uploadOnCloudinary(req.file.path);
+            if (!newThumbnailUrl) {
+                return res.status(400).json({ message: "Error uploading new thumbnail" });
+            }
+
+            if (video.thumbnail) {
+                await deleteFromCloudinary(video.thumbnail, "image");
+            }
+
+            video.thumbnail = newThumbnailUrl;
+        }
+
+        await video.save();
+
+        return res.status(200).json({
+            message: "Video updated successfully",
+            video
+        });
+
+    } catch (error) {
+        console.error("Error updating video:", error);
+        return res.status(500).json({ message: "Error occurred while updating video" });
+    }
+};

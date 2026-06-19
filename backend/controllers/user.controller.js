@@ -161,13 +161,15 @@ export const toggleSubscribeChannel = async (req, res) => {
 export const getChannelById = async (req, res) => {
     try {
         const { channelId } = req.params
-        const channel = await Channel.findById(channelId).populate({
-            path: "videos",
-            populate: {
-                path: "channel",
-                select: "name avatar"
-            }
-        })
+        const channel = await Channel.findById(channelId)
+            .populate({
+                path: "videos",
+                populate: {
+                    path: "channel",
+                    select: "name avatar"
+                }
+            })
+            .populate("playlists")
 
         if (!channel) {
             return res.status(404).json({ message: "Channel not found" })
@@ -238,5 +240,26 @@ export const getWatchHistory = async (req, res) => {
     } catch (error) {
         console.log(error)
         return res.status(500).json({ message: `Failed to fetch watch history: ${error}` })
+    }
+}
+
+export const getSubscribedChannelsVideos = async (req, res) => {
+    try {
+        const userId = req.userId
+        
+        const subscribedChannels = await Channel.find({ subscribers: userId })
+        const channelIds = subscribedChannels.map((c) => c._id)
+
+        const videos = await Video.find({ channel: { $in: channelIds } })
+            .populate("channel")
+            .sort({ createdAt: -1 })
+
+        return res.status(200).json({
+            message: "Subscribed channels videos fetched successfully",
+            videos
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: `Failed to fetch subscribed channel videos: ${error}` })
     }
 }

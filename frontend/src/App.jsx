@@ -25,6 +25,8 @@ import SearchResults from "./pages/Videos/SearchResults";
 import ChannelPage from "./pages/Channel/ChannelPage";
 import WatchHistory from "./pages/Videos/WatchHistory";
 import LikedVideos from "./pages/Videos/LikedVideos";
+import Subscriptions from "./pages/Videos/Subscriptions";
+import PlaylistDetails from "./pages/Playlist/PlaylistDetails";
 
 const ProtectRoute = ({ userData, children }) => {
   if (!userData) {
@@ -61,6 +63,14 @@ const App = () => {
             element={
               <ProtectRoute userData={userData}>
                 <LikedVideos />
+              </ProtectRoute>
+            }
+          />
+          <Route
+            path="/subscriptions"
+            element={
+              <ProtectRoute userData={userData}>
+                <Subscriptions />
               </ProtectRoute>
             }
           />

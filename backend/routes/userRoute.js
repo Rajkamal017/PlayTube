@@ -1,6 +1,6 @@
 import express from "express"
 import isAuth from "../middlewares/isAuth.js"
-import { createChannel, getChannelData, getCurrentUser, updateChannel, toggleSubscribeChannel, getChannelById, addToWatchHistory, getWatchHistory } from "../controllers/user.controller.js"
+import { createChannel, getChannelData, getCurrentUser, updateChannel, toggleSubscribeChannel, getChannelById, addToWatchHistory, getWatchHistory, getSubscribedChannelsVideos } from "../controllers/user.controller.js"
 import upload from "../middlewares/multer.js"
 
 
@@ -22,5 +22,6 @@ userRouter.get("/channel/:channelId", getChannelById)
 
 userRouter.post("/watch-history/:videoId", isAuth, addToWatchHistory)
 userRouter.get("/watch-history", isAuth, getWatchHistory)
+userRouter.get("/subscriptions/videos", isAuth, getSubscribedChannelsVideos)
 
 export default userRouter

@@ -10,12 +10,13 @@ import {
   FaMicrophone,
   FaTimes,
   FaUserCircle,
+  FaRegFolderOpen,
 } from "react-icons/fa";
 import { IoIosAddCircle } from "react-icons/io";
 import { GoVideo } from "react-icons/go";
 import { SiYoutubeshorts } from "react-icons/si";
 import { MdOutlineSubscriptions } from "react-icons/md";
-import { useNavigate, Outlet, useLocation } from "react-router-dom";
+import { useNavigate, Outlet, useLocation, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Profile from "../components/Profile";
 
@@ -26,6 +27,7 @@ function Home() {
   const navigate = useNavigate();
   const location = useLocation();
   const { userData } = useSelector((state) => state.user);
+  const { allVideosData } = useSelector((state) => state.content);
   const [popup, setPopup] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -161,7 +163,10 @@ function Home() {
             text={"Subscriptions"}
             open={sidebarOpen}
             selected={selectedItem === "Subscriptions"}
-            onClick={() => setSelectedItem("Subscriptions")}
+            onClick={() => {
+              setSelectedItem("Subscriptions");
+              navigate("/subscriptions");
+            }}
           />
         </nav>
         <hr className="border-gray-800 my-3" />
@@ -215,18 +220,102 @@ function Home() {
         className={`overflow-y-auto p-4 flex flex-col pb-16 transitions-all duration-300 ${sidebarOpen ? "md:ml-60" : "md:ml-20"}`}
       >
         {location.pathname === "/" && (
-          <>
-            <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pt-2 mt-15">
+          <div className="flex flex-col gap-6 mt-15">
+            {/* Categories */}
+            <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pt-2">
               {categories.map((cat, idx) => (
                 <button
                   key={idx}
-                  className="whitespace-nowrap bg-[#272727] px-1 py-1 rounded-md  text-sm hover:bg-gray-700"
+                  className="whitespace-nowrap bg-[#272727] px-3 py-1.5 rounded-md text-sm hover:bg-gray-700 cursor-pointer transition"
                 >
                   {cat}
                 </button>
               ))}
             </div>
-          </>
+
+            {/* Video Grid */}
+            {allVideosData && allVideosData.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-2">
+                {allVideosData.map((video) => {
+                  if (!video) return null;
+                  return (
+                    <Link
+                      to={`/watch/${video._id}`}
+                      key={video._id}
+                      className="flex flex-col gap-2.5 group cursor-pointer bg-transparent transition duration-300"
+                    >
+                      {/* Video Thumbnail */}
+                      <div className="aspect-video w-full rounded-xl overflow-hidden bg-black relative border border-gray-800/30">
+                        <img
+                          src={video.thumbnail}
+                          alt={video.title}
+                          className="w-full h-full object-cover group-hover:scale-102 transition duration-500"
+                        />
+                        <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition duration-300" />
+                      </div>
+
+                      {/* Video Details */}
+                      <div className="flex gap-3 px-1 mt-1">
+                        {/* Channel Avatar */}
+                        {video.channel && (
+                          <div
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              navigate(`/channel/${video.channel._id}`);
+                            }}
+                            className="w-9 h-9 rounded-full overflow-hidden bg-[#1c1c1c] border border-gray-850 shrink-0 hover:opacity-85 transition"
+                          >
+                            <img
+                              src={video.channel.avatar || "https://via.placeholder.com/150"}
+                              alt={video.channel.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                        
+                        <div className="flex flex-col gap-1 overflow-hidden">
+                          <h3 className="text-sm font-bold text-white group-hover:text-purple-400 transition line-clamp-2 leading-snug">
+                            {video.title}
+                          </h3>
+                          {video.channel && (
+                            <span
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                navigate(`/channel/${video.channel._id}`);
+                              }}
+                              className="text-xs text-gray-400 hover:text-white transition cursor-pointer"
+                            >
+                              {video.channel.name}
+                            </span>
+                          )}
+                          <div className="text-xs text-gray-500 flex items-center gap-1.5 mt-0.5">
+                            <span>{video.views || 0} views</span>
+                            <span>•</span>
+                            <span>{new Date(video.createdAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : (
+              /* Empty state */
+              <div className="flex flex-col items-center justify-center text-center py-24 space-y-4">
+                <div className="bg-[#1c1c1c] text-gray-500 p-6 rounded-full border border-gray-800">
+                  <FaRegFolderOpen size={48} />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-lg font-bold text-gray-300">No videos found</h3>
+                  <p className="text-sm text-gray-500 max-w-sm">
+                    There are no videos uploaded to PlayTube yet. Click "Create" to upload a new video!
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         )}
         {popup && <Profile />}
         <div className="mt-2"></div>
@@ -266,7 +355,10 @@ function Home() {
           text={"Subscriptions"}
           active={active === "Subscriptions"}
           on
-          onClick={() => setActive("Subscriptions")}
+          onClick={() => {
+            setActive("Subscriptions");
+            navigate("/subscriptions");
+          }}
         />
         <MobileSizeNav
           icon={

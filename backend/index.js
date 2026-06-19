@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser"
 import cors from "cors"
 import userRouter from "./routes/userRoute.js"
 import contentRouter from "./routes/contentRoute.js"
+import playlistRouter from "./routes/playlistRoute.js"
 
 const port = process.env.PORT || 8000
 
@@ -21,6 +22,7 @@ app.use(cors({
 app.use("/api/auth", authRouter)
 app.use("/api/user", userRouter)
 app.use("/api/content", contentRouter)
+app.use("/api/playlist", playlistRouter)
 
 app.listen(port, () => {
     connectDb()
